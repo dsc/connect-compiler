@@ -9,6 +9,7 @@ author :
     email           : 'dsc@less.ly'
     url             : 'http://less.ly'
 repository          : type : 'git', url : 'git://github.com/dsc/connect-compiler.git'
+main                : 'index'
 dependencies :
     connect         : '>= 1.7.0'
     coco            : '>= 0.6.7'
