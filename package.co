@@ -1,0 +1,20 @@
+private             : true
+name                : 'connect-compiler'
+version             : '0.0.1'
+description         : 'Dynamically recompile stale assets'
+homepage            : 'http://dsc.github.com/connect-compiler'
+keywords            : [ 'connect', 'middleware', 'compiler', 'development', 'coffee-script', 'jade', 'css', 'minify' ]
+author :
+    name            : 'David Schoonover'
+    email           : 'dsc@less.ly'
+    url             : 'http://less.ly'
+repository          : type : 'git', url : 'git://github.com/dsc/connect-compiler.git'
+dependencies :
+    connect         : '>= 1.7.0'
+    coco            : '>= 0.6.7'
+    seq             : '>= 0.3.4'
+devDependencies :
+    expresso : '>=0.7.x'
+scripts             : test : 'expresso'
+engine              : node : '>=0.4.0'
+license             : 'MIT'
