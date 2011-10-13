@@ -114,7 +114,7 @@ exports.LOG = LOG =
             return name if val is level
         String level
     
-    stringToLevel : (level_name) ->
+    stringToLevel : (level) ->
         return level unless typeof level is 'string'
         level .= toUpperCase()
         for name, val in LOG
@@ -213,7 +213,7 @@ class exports.Compiler extends EventEmitter
      */
     (@info) ->
         super()
-        for k, v in this
+        for own k, v in this
             @[k] = v.bind(this) if typeof v is 'function'
         mod = @module
         @module = require mod if mod and typeof mod is 'string'
@@ -453,7 +453,7 @@ class exports.CommonJSCompiler extends Compiler
         co     : 'coco'
         coffee : 'coffee'
         jison  : 'jison'
-    drop_cjs_parts : 1
+    drop_cjs_parts : 0 # allows you to drop the mountpoint if your js files live in, say, /js
     
     -> super ...
     
@@ -466,7 +466,10 @@ class exports.CommonJSCompiler extends Compiler
         path.join(destDir, pathname).replace(@match, '.mod.js')
     
     compileSync: (data) ->
-        mod_id = @info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(@drop_cjs_parts).join('/')
+        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(@drop_cjs_parts)
+        mod_parts.pop() if mod_parts[mod_parts.length] is 'index'
+        mod_id = path.normalize mod_parts.join('/')
+        
         header = @CJS_HEADER.replace '{ID}', mod_id
         header+data+@CJS_FOOTER
     
@@ -582,7 +585,7 @@ for c of cs then register c
 
 expand = (...parts) ->
     p = path.normalize path.join ...parts
-    if startsWith p, '~'
+    if p.indexOf('~') is 0
         home = process.env.HOME or process.env.HOMEPATH
         p = path.join home, p.slice(1)
     path.resolve p
@@ -603,7 +606,6 @@ function mkdirp (p, mode=8r0755, cb)
     return cb null if err?.code is 'EEXIST'
     return cb err  if err
     
-    err <- fs.mkdir _p
-    return cb null if err?.code is 'EEXIST'
-    return cb err  if err
+    err <- fs.mkdir p, mode
+    if err?.code is 'EEXIST' then cb null else cb err
 

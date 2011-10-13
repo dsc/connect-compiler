@@ -132,8 +132,8 @@ exports.LOG = LOG = {
     }
     return String(level);
   },
-  stringToLevel: function(level_name){
-    var level, name, val, _ref;
+  stringToLevel: function(level){
+    var name, val, _ref;
     if (typeof level !== 'string') {
       return level;
     }
@@ -224,10 +224,10 @@ exports.Compiler = Compiler = (function(superclass){
    * @param {Object} info Request info merged with settings. (Pointer, not copy.)
    */;
   function Compiler(info){
-    var k, v, mod;
+    var k, v, mod, _own = {}.hasOwnProperty;
     this.info = info;
     Compiler.superclass.call(this);
-    for (k in this) {
+    for (k in this) if (_own.call(this, k)) {
       v = this[k];
       if (typeof v === 'function') {
         this[k] = v.bind(this);
@@ -542,7 +542,7 @@ exports.CommonJSCompiler = CommonJSCompiler = (function(superclass){
     coffee: 'coffee',
     jison: 'jison'
   };
-  prototype.drop_cjs_parts = 1;
+  prototype.drop_cjs_parts = 0;
   function CommonJSCompiler(){
     CommonJSCompiler.superclass.apply(this, arguments);
   }
@@ -564,8 +564,12 @@ exports.CommonJSCompiler = CommonJSCompiler = (function(superclass){
     return path.join(destDir, pathname).replace(this.match, '.mod.js');
   };
   prototype.compileSync = function(data){
-    var mod_id, header;
-    mod_id = this.info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(this.drop_cjs_parts).join('/');
+    var mod_parts, mod_id, header;
+    mod_parts = this.info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(this.drop_cjs_parts);
+    if (mod_parts[mod_parts.length] === 'index') {
+      mod_parts.pop();
+    }
+    mod_id = path.normalize(mod_parts.join('/'));
     header = this.CJS_HEADER.replace('{ID}', mod_id);
     return header + data + this.CJS_FOOTER;
   };
@@ -697,7 +701,7 @@ expand = function(){
   var parts, p, home;
   parts = __slice.call(arguments);
   p = path.normalize(path.join.apply(path, parts));
-  if (startsWith(p, '~')) {
+  if (p.indexOf('~') === 0) {
     home = process.env.HOME || process.env.HOMEPATH;
     p = path.join(home, p.slice(1));
   }
@@ -725,11 +729,10 @@ function mkdirp(p, mode, cb){
       if (err) {
         return cb(err);
       }
-      return fs.mkdir(_p, function(err){
+      return fs.mkdir(p, mode, function(err){
         if ((err != null ? err.code : void 8) === 'EEXIST') {
           return cb(null);
-        }
-        if (err) {
+        } else {
           return cb(err);
         }
       });
