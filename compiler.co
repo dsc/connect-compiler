@@ -15,8 +15,6 @@ Seq = require 'seq'
 
 
 
-
-
 /**
  * Sets up an instance of the CompilerMiddleware.
  * 
@@ -148,7 +146,8 @@ exports.DEFAULTS = DEFAULTS =
     resolve_index    : false     # if true-y, resolve directories to this filename: false | true => 'index.html' | str
     allowed_methods  : [ 'GET' ] # HTTP methods compiler should process
     
-    on               : null      # event handlers to add: { event : handler, ... }
+    # TODO
+    # on               : null      # event handlers to add: { event : handler, ... }
     
     # settings object is passed to compilers and all keys are preserved
     options :                    # additional options can be specified per-compiler
@@ -388,7 +387,6 @@ class exports.Compiler extends EventEmitter
 class exports.ExternalCompiler extends Compiler
     id         : 'external'
     env        : null    # Process environment to use. Default: `process.env`.
-    # path       : null    # PATH for command. Default: `env.PATH` if `env`, then `process.env.PATH`.
     cwd        : null    # Current working directory for command. Default: process.cwd().
     timeout    : 3.000_s # Command timeout (seconds). Default: 
     cmd        : null    # The compiler command.
