@@ -73,7 +73,7 @@ exports = module.exports = CompilerMiddleware = function(settings){
     }
     try {
       Seq(settings.enabled).seqEach(function(id, i){
-        var C, _this = this;
+        var C, _ref, _info, _this = this;
         C = compilers[id];
         if (!(C && (!success || settings.cascade))) {
           return this(null);
@@ -83,7 +83,8 @@ exports = module.exports = CompilerMiddleware = function(settings){
         }
         info.compiler = C;
         info.id = id;
-        return C.run(info, function(err, ok){
+        _info = __import(__import({}, info), ((_ref = info.options) != null ? _ref[id] : void 8) || {});
+        return C.run(_info, function(err, ok){
           if (!err && ok) {
             success = ok;
             info.matches++;
@@ -542,7 +543,7 @@ exports.CommonJSCompiler = CommonJSCompiler = (function(superclass){
     coffee: 'coffee',
     jison: 'jison'
   };
-  prototype.drop_cjs_parts = 0;
+  prototype.drop_path_parts = 0;
   function CommonJSCompiler(){
     CommonJSCompiler.superclass.apply(this, arguments);
   }
@@ -564,8 +565,11 @@ exports.CommonJSCompiler = CommonJSCompiler = (function(superclass){
     return path.join(destDir, pathname).replace(this.match, '.mod.js');
   };
   prototype.compileSync = function(data){
-    var mod_parts, mod_id, header;
-    mod_parts = this.info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(this.drop_cjs_parts);
+    var drop, mod_parts, mod_id, header, _ref;
+    drop = (_ref = this.info.drop_path_parts) != null
+      ? _ref
+      : this.drop_path_parts;
+    mod_parts = this.info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(drop);
     if (mod_parts[mod_parts.length] === 'index') {
       mod_parts.pop();
     }

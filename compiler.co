@@ -81,7 +81,8 @@ exports = module.exports = CompilerMiddleware = (settings={}, ...custom) ->
                     console.log "\n#{log_prefix} (#i) Checking '#{id}'..." if settings.log_level <= LOG.DEBUG
                     info.compiler = C
                     info.id = id
-                    C.run info, (err, ok) ~>
+                    _info = {} <<< info <<< (info.options?[id] or {})
+                    C.run _info, (err, ok) ~>
                         if not err and ok
                             success := ok
                             info.matches++
@@ -453,7 +454,7 @@ class exports.CommonJSCompiler extends Compiler
         co     : 'coco'
         coffee : 'coffee'
         jison  : 'jison'
-    drop_cjs_parts : 0 # allows you to drop the mountpoint if your js files live in, say, /js
+    drop_path_parts : 0 # allows you to drop the mountpoint if your js files live in, say, /js
     
     -> super ...
     
@@ -466,7 +467,8 @@ class exports.CommonJSCompiler extends Compiler
         path.join(destDir, pathname).replace(@match, '.mod.js')
     
     compileSync: (data) ->
-        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(@drop_cjs_parts)
+        drop = @info.drop_path_parts ? @drop_path_parts
+        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(drop)
         mod_parts.pop() if mod_parts[mod_parts.length] is 'index'
         mod_id = path.normalize mod_parts.join('/')
         

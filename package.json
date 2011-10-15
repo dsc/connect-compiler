@@ -20,8 +20,10 @@
   },
   "main": "compiler",
   "dependencies": {
-    "coco": ">= 0.6.7",
     "seq": ">= 0.3.4"
+  },
+  "devDependencies": {
+    "coco": ">= 0.6.7"
   },
   "repository": {
     "type": "git",
