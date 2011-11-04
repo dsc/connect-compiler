@@ -9,7 +9,10 @@
     "compiler",
     "development",
     "coffee-script",
+    "coco",
     "jade",
+    "stylus",
+    "less",
     "css",
     "minify"
   ],
@@ -19,11 +22,15 @@
     "url": "http://less.ly"
   },
   "main": "compiler",
+  "scripts": {
+    "test": "expresso"
+  },
   "dependencies": {
     "seq": ">= 0.3.4"
   },
   "devDependencies": {
-    "coco": ">= 0.6.7"
+    "coco": ">= 0.6.7",
+    "expresso": ">=0.7.x"
   },
   "repository": {
     "type": "git",
