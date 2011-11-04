@@ -1,11 +1,17 @@
 # todo
 
-- Bug: compiler errors propagate to node
-- Replace `#token` in config Strings.
-- Make `setup()` a simple proxy to CompilerMiddleware class.
-- Restructure middleware responder to use events to trigger compiler phases.
+- **Bug:** compiler errors sometimes propagate to node?! well shit son, somebody needs tests.
+- Remove `yaml-python`, `CommonJS` compilers and create a `connect-compiler-extras` package for myself.
 
-## todoc
+## later
+- Restructure middleware responder to use events to trigger compiler phases, remove `seq`.
+- Make `setup()` a simple proxy to `CompilerMiddleware` class.
+- Add post-`write()` cleanup/finally event (which fires whether successful or not).
+- GitHub site with introduction, documentation.
+- Replace `#token` in config Strings.
+
+
+## docs
 
 - examples:
     - simple usage
@@ -16,10 +22,11 @@
         - extending an existing compiler
 - per-compiler documentation, options
 
+
 ## New Compilers
 
 - Haml
-- Stylus
+- yaml-js
 - Bundler: cat together multiple files (recursive compiler)
 
 

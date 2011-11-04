@@ -348,7 +348,7 @@ class exports.Compiler extends EventEmitter
                     if info.create_dirs
                         mkdirp path.dirname(info.dest), 8r0755, this
                     else
-                        this.ok()
+                        @ok()
                 .seq ->
                     c.destValid info.dest, this
                 .seq (info.destStat) ->
@@ -514,6 +514,28 @@ class exports.JadeCompiler extends Compiler
 ### CSS Compilers
 
 
+class exports.StylusCompiler extends Compiler
+    id          : 'stylus'
+    match       : /\.css$/i
+    ext         : '.styl'
+    module      : 'stylus'
+    
+    -> super ...
+    compile : (text, options={}, cb) ->
+        stylus = @module(text)
+        
+        options.filename = @info.src
+        for k, v in options
+            if k is 'nib' and v
+                stylus.use nib()
+            else if <[ use import include ]>.indexOf(k) is not -1
+                stylus[k](v)
+            else
+                stylus.set k, v
+        
+        stylus.render cb
+
+
 class exports.LessCompiler extends Compiler
     id          : 'less'
     match       : /\.css$/i
@@ -568,12 +590,15 @@ class exports.YamlCompiler extends ExternalCompiler
 
 
 
+# Register Compilers
+
 cs = 
     CoffeeScriptCompiler
     CocoCompiler
     CommonJSCompiler
     UglifyCompiler
     JadeCompiler
+    StylusCompiler
     LessCompiler
     SassJSCompiler
     SassRubyCompiler
@@ -581,6 +606,7 @@ cs =
     YamlCompiler
 
 for c of cs then register c
+
 
 
 ### Helpers

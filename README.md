@@ -1,10 +1,10 @@
-## connect-compiler
+# connect-compiler
 
-[`connect`](http://senchalabs.github.com/connect/) middleware for dynamically recompiling derived files at serve-time. This module is designed for speeding up development; best-practices would have you compile all necessary files as part of your production deploy process.
+[`connect`](http://senchalabs.github.com/connect/) middleware for dynamically recompiling derived files at serve-time. This module is designed for speeding up development; best-practices would have you compile all necessary files as part of your production deploy process. But you knew that, of course.
 
 Usage is the same as all other `connect` middleware:
 
-````javascript
+````js
     var connect  = require('connect')
     ,   compiler = require('connect-compiler')
     
@@ -17,13 +17,14 @@ Usage is the same as all other `connect` middleware:
             }),
             connect.static(__dirname + '/public'),
             connect.static(__dirname + '/var')
-        );
+        )
+    ;
     
     server.listen(6969);
 ````
 
 
-### Settings
+## Settings
 
 The compiler middleware takes a settings object, minimally containing a list of compilers to enable (`enabled`). Most uses will also specify a source directory (`src`).
 
@@ -237,54 +238,57 @@ The compiler middleware takes a settings object, minimally containing a list of 
 
 
 
-### Compilers
+## Compilers
 
--   #### CoffeeScriptCompiler
+-   ### CoffeeScriptCompiler
     
     
--   #### CocoCompiler
+-   ### CocoCompiler
     
     
--   #### CommonJSCompiler
+-   ### CommonJSCompiler
     
     
--   #### UglifyCompiler
+-   ### UglifyCompiler
     
     
--   #### JadeCompiler
+-   ### JadeCompiler
     
     
--   #### LessCompiler
+-   ### StylusCompiler
     
     
--   #### SassJSCompiler
+-   ### LessCompiler
     
     
--   #### SassRubyCompiler
+-   ### SassJSCompiler
     
     
--   #### JisonCompiler
+-   ### SassRubyCompiler
     
     
--   #### YamlCompiler
+-   ### JisonCompiler
     
     
-
-### API
-
--   #### CompilerMiddleware(settings={}, ...custom)
-    
-    
--   #### Compiler
-    
-    
--   #### ExternalCompiler
+-   ### YamlCompiler
     
     
 
+## API
+
+-   ### CompilerMiddleware(settings={}, ...custom)
+    
+    
+-   ### Compiler
+    
+    
+-   ### ExternalCompiler
+    
+    
 
 
-### Feedback
+
+## Feedback
 
 
 
