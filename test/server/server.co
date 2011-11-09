@@ -1,0 +1,48 @@
+path     = require 'path'
+express  = require 'express'
+
+
+PORT        = 8080
+PROJECT_DIR = path.dirname __dirname
+TESTS       = __dirname
+WWW         = TESTS+'/browser'
+VAR         = TESTS+'/var'
+
+compiler = require PROJECT_DIR+'/compiler'
+
+
+app = express.createServer()
+app.listen PORT
+
+console.log "Test Server started on port #PORT..."
+
+app.configure ->
+    console.log 'server.configure()'
+    
+    app.use express.logger()
+    app.use express.bodyParser()
+    app.use express.methodOverride()
+    
+    app.use compiler do
+        enabled : <[ coco coffee jade stylus sass jison ]>
+        src     : WWW
+        dest    : VAR
+        options :
+            stylus    : nib:true, compress:true
+        log_level : 'DEBUG'
+    
+    # compress anything that desires compression (*.min.js)
+    app.use compiler do
+        enabled : <[ uglify ]>
+        src     : [ WWW, VAR ]
+        dest    : VAR
+        log_level : 'DEBUG'
+    
+    app.use express.static WWW
+    app.use express.static VAR
+    
+    app.use express.errorHandler do
+        dumpExceptions : true
+        showStack      : true
+
+

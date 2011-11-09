@@ -22,91 +22,43 @@ Seq = require 'seq'
  * @param {Compiler[]} [...custom] 
  * @returns {Function}
  */
-exports = module.exports = CompilerMiddleware = (settings={}, ...custom) ->
-    CWD      = process.cwd()
-    settings = {} <<< DEFAULTS <<< settings
-    
-    if not settings.enabled or settings.enabled.length is 0
-        throw new Error "You must supply a list of enabled compilers!"
-    
-    if typeof settings.enabled is 'string'
-        settings.enabled = [ settings.enabled ]
-    
-    unless settings.roots
-        srcDirs = delete settings.src or CWD
-        srcDirs = [srcDirs] unless Array.isArray srcDirs
-        destDir = delete settings.dest or srcDirs[0]
-        settings.roots = srcDirs.map -> [it, destDir]
-    
-    unless Array.isArray settings.roots
-        settings.roots = ( [src, dest] for src, dest in settings.roots )
-    
-    settings.log_level = LOG.stringToLevel settings.log_level
-    
-    if settings.log_level <= LOG.DEBUG
-        console.log 'compiler.setup()'
-        console.dir settings
-        console.log ''
-    
-    return (req, res, next) ->
-        if settings.allowed_methods.indexOf(req.method) is -1
-            return next()
-        
-        request =
-            req  : req
-            res  : res
-            next : next
-            url  : req.url
-            path : parse(req.url).pathname
-        
-        if settings.mount and request.path.indexOf(settings.mount) is 0
-            request.path.=slice(settings.mount.length)
-        
-        info = {} <<< settings <<< request <<<
-            settings : settings
-            request  : request
-            cwd      : CWD
-            matches  : 0
-        
-        success = false
-        
-        log_prefix = ">>>>    [compiler]"
-        console.log "#{log_prefix} Looking up compilers for '#{request.path}'..." if settings.log_level <= LOG.DEBUG
-        
-        try do
-            Seq(settings.enabled)
-                .seqEach (id, i) ->
-                    C = compilers[id]
-                    return this(null) unless C and (not success or settings.cascade)
-                    console.log "\n#{log_prefix} (#i) Checking '#{id}'..." if settings.log_level <= LOG.DEBUG
-                    info.compiler = C
-                    info.id = id
-                    _info = {} <<< info <<< (info.options?[id] or {})
-                    C.run _info, (err, ok) ~>
-                        if not err and ok
-                            success := ok
-                            info.matches++
-                        console.log "#{log_prefix} Completed '#{id}'! (ok=#ok, err=#err) --> success=#{success}" if settings.log_level <= LOG.DEBUG
-                        this null
-                .seq ->
-                    console.log "#{log_prefix} Done! (success=#{success})" if settings.log_level <= LOG.DEBUG
-                    next()
-                .catch (err) ->
-                    console.log "#{log_prefix} Error! ", err if err if settings.log_level <= LOG.ERROR
-                    @die()
-                    next()
-        catch err
-            if settings.log_level <= LOG.ERROR
-                console.log "#{log_prefix} Caught Err!", (if err.stack then '' else err)
-                console.log that if err.stack
-            next()
-        
-        void
+exports = module.exports = setup = (settings={}, ...custom) ->
+    cmw = new CompilerMiddleware(settings, custom)
+    cmw.respond
 
+exports.setup = setup
 
 
 /** All known compilers, by id. */
-exports.compilers = compilers = {}
+exports.compilers = compilers = { __proto__: null }
+
+
+/** Default settings. */
+exports.DEFAULTS = DEFAULTS =
+    enabled          : []        # compiler_id[]
+    
+    src              : null      # str | str[] -- default: CWD
+    dest             : null      # str -- default: src
+    roots            : null      # src to dest pairs: { src:dest, ... } | [[src, dest], ...]
+    mount            : ''        # prefix trimmed off request path
+    
+    delta            : null      # delta secs of mtime for file to be stale
+    expires          : false     # automatically treat files as stale if this old in secs
+    
+    log_level        : 'WARN'    # Logging verbosity.
+    create_dirs      : true      # if dest dir is missing, create it?
+    external_timeout : 3000      # ms after which to kill subprocess commands
+    cascade          : false     # invoke all compilers that match? otherwise, only first.
+    resolve_index    : false     # if true-y, resolve directories to this filename: false | true => 'index.html' | str
+    allowed_methods  : [ 'GET' ] # HTTP methods compiler should process
+    
+    # TODO (maybe)
+    # on               : null      # event handlers to add: { event : handler, ... }
+    
+    # settings object is passed to compilers and all keys are preserved
+    options :                    # additional options can be specified per-compiler
+        all : {}                 # options to merge into options for all compilers (in case of key conflict with settings)
+
 
 /** Log Levels */
 exports.LOG = LOG =
@@ -128,31 +80,110 @@ exports.LOG = LOG =
     INFO   : 20
     DEBUG  : 10
 
-/** Default settings. */
-exports.DEFAULTS = DEFAULTS =
-    enabled          : []        # compiler_id[]
+
+/**
+ * CompilerMiddleware class.
+ * @class
+ */
+class exports.CompilerMiddleware extends EventEmitter
     
-    src              : null      # str | str[] -- default: CWD
-    dest             : null      # str -- default: src
-    roots            : null      # src to dest pairs: { src:dest, ... } | [[src, dest], ...]
-    mount            : ''        # prefix trimmed off request path
+    /**
+     * @constructor
+     * @param {Object} [settings={}] Settings object.
+     * @param {Compiler[]} [custom=[]] List of custom compilers to add.
+     */
+    (settings={}, @custom=[]) ->
+        super()
+        @respond.=bind this
+        @settings = settings = {} <<< DEFAULTS <<< settings
+        
+        if not settings.enabled or settings.enabled.length is 0
+            throw new Error "You must supply a list of enabled compilers!"
+        
+        if typeof settings.enabled is 'string'
+            settings.enabled = [ settings.enabled ]
+        
+        unless settings.roots
+            srcDirs = delete settings.src or process.cwd()
+            srcDirs = [srcDirs] unless Array.isArray srcDirs
+            destDir = delete settings.dest or srcDirs[0]
+            settings.roots = srcDirs.map -> [it, destDir]
+        
+        unless Array.isArray settings.roots
+            settings.roots = ( [src, dest] for src, dest in settings.roots )
+        
+        if settings.resolve_index is true
+            settings.resolve_index = 'index.html'
+        if settings.resolve_index
+            settings.resolve_index .= trimLeft '/'
+        
+        settings.log_level = LOG.stringToLevel settings.log_level
+        
+        if settings.log_level <= LOG.DEBUG
+            console.log 'compiler.setup()'
+            console.dir settings
+            console.log ''
     
-    delta            : null      # delta secs of mtime for file to be stale
-    expires          : false     # automatically treat files as stale if this old in secs
     
-    log_level        : 'WARN'    # Logging verbosity.
-    create_dirs      : true      # if dest dir is missing, create it?
-    external_timeout : 3000      # ms after which to kill subprocess commands
-    cascade          : false     # invoke all compilers that match? otherwise, only first.
-    resolve_index    : false     # if true-y, resolve directories to this filename: false | true => 'index.html' | str
-    allowed_methods  : [ 'GET' ] # HTTP methods compiler should process
-    
-    # TODO
-    # on               : null      # event handlers to add: { event : handler, ... }
-    
-    # settings object is passed to compilers and all keys are preserved
-    options :                    # additional options can be specified per-compiler
-        all : {}                 # options to merge into options for all compilers (in case of key conflict with settings)
+    respond: (req, res, next) ->
+        settings = @settings
+        if settings.allowed_methods.indexOf(req.method) is -1
+            return next()
+        
+        request =
+            req  : req
+            res  : res
+            next : next
+            url  : req.url
+            path : parse(req.url).pathname
+        
+        if settings.mount and request.path.indexOf(settings.mount) is 0
+            request.path.=slice(settings.mount.length)
+        
+        if settings.resolve_index and /\/$/.test request.path
+            request.path = path.join request.path, settings.resolve_index
+        
+        
+        info = {} <<< settings <<< request <<<
+            settings : settings
+            request  : request
+            cwd      : process.cwd()
+            matches  : 0
+        
+        success = false
+        
+        log_prefix = ">>>>    [compiler]"
+        console.log "#log_prefix Looking up compilers for '#{request.path}'..." if settings.log_level <= LOG.DEBUG
+        
+        try do
+            Seq(settings.enabled)
+                .seqEach (id, i) ->
+                    C = compilers[id]
+                    return this(null) unless C and (not success or settings.cascade)
+                    console.log "\n#log_prefix (#i) Checking '#id'..." if settings.log_level <= LOG.DEBUG
+                    info.compiler = C
+                    info.id = id
+                    _info = {} <<< info <<< (info.options?[id] or {})
+                    C.run _info, (err, ok) ~>
+                        if not err and ok
+                            success := ok
+                            info.matches++
+                        console.log "#log_prefix Completed '#id'! (ok=#ok, err=#err) --> success=#success" if settings.log_level <= LOG.DEBUG
+                        this null
+                .seq ->
+                    console.log "#log_prefix Done! (success=#success)" if settings.log_level <= LOG.DEBUG
+                    next()
+                .catch (err) ->
+                    console.log "#log_prefix Error! ", err if err if settings.log_level <= LOG.ERROR
+                    @die()
+                    next()
+        catch err
+            if settings.log_level <= LOG.ERROR
+                console.log "#log_prefix Caught Err!", (if err.stack then '' else err)
+                console.log that if err.stack
+            next()
+        
+        void
 
 
 
@@ -170,14 +201,14 @@ exports.register = register = (NewCompiler) ->
     id = proto.id
     name = NewCompiler.displayName or NewCompiler.name or id
     unless id
-        throw new Error "Compiler #{name} must have a valid id (not '#{id}')!"
+        throw new Error "Compiler #name must have a valid id (not '#id')!"
     
     NewCompiler.id = id
     old = compilers[id]
     if old and old is not NewCompiler
-        throw new Error "Compiler id collision ('#{id}'): new=#{name} is not old=#{old.displayName or old.name or old.id}!"
+        throw new Error "Compiler id collision ('#id'): new=#name is not old=#{old.displayName or old.name or old.id}!"
     unless proto.compile or proto.compileSync
-        throw new Error "Compiler #{name} missing a compile/compileSync method!"
+        throw new Error "Compiler #name missing a compile/compileSync method!"
     
     Superclass = NewCompiler.superclass or proto.constructor
     NewCompiler.run      ?= Superclass.run or Compiler.run
@@ -225,7 +256,7 @@ class exports.Compiler extends EventEmitter
             level_name = if LOG.levelToString level then that else ''
             name = String(this)
             name += '\t' if name.length < 8
-            console.log "\t#{level_name}\t#{name}\t", ...msgs
+            console.log "\t#level_name\t#name\t", ...msgs
         true
     
     
@@ -236,14 +267,14 @@ class exports.Compiler extends EventEmitter
      * @returns {String|String[]|false-y} Resolved source path(s) if compiler matches, false otherwise.
      */
     matches: (srcDir, pathname) ->
-        @log LOG.DEBUG, "matches(#{srcDir}, #{pathname})"
+        @log LOG.DEBUG, "matches(#srcDir, #pathname)"
         path.join(srcDir, pathname).replace(@match, @ext) if @match.exec(pathname)
     
     srcValid: (src, cb) ->
         fs.stat src, cb
     
     validate: (pairs, cb) ->
-        @log LOG.DEBUG, "validate( [#{pairs}], #{typeof cb} )"
+        @log LOG.DEBUG, "validate( [#pairs], #{typeof cb} )"
         unless pairs? and pairs.length
             return cb "No matching sources."
         [srcs, destDir] = pairs.shift()
@@ -267,7 +298,7 @@ class exports.Compiler extends EventEmitter
         path.join destDir, pathname
     
     destValid: (dest, cb) ->
-        @log LOG.DEBUG, "destValid( #{dest}, #{typeof cb} )"
+        @log LOG.DEBUG, "destValid( #dest, #{typeof cb} )"
         fs.stat dest, (err, destStat) ~>
             if err and 'ENOENT' is err.code
                 cb null, null
@@ -312,7 +343,11 @@ class exports.Compiler extends EventEmitter
             return wc.doCompile text, false, (err, data) ~>
                 if err then cb(err) else @doCompile data, true, cb
         
-        opts = if typeof @options is 'function' then @options() else @options
+        info_opts = @info.options?[@id] or {}
+        if typeof @options is 'function'
+            opts = @options(info_opts)
+        else if @options or info_opts
+            opts = {} <<< @options <<< info_opts
         args = [text] + (if opts? then [opts] else [])
         
         if fn = @compile
@@ -326,7 +361,7 @@ class exports.Compiler extends EventEmitter
     
     
     write: (dest, data, cb) ->
-        @log LOG.INFO, "writing #{@info.src} --> #{dest}"
+        @log LOG.INFO, "writing #{@info.src} --> #dest"
         fs.writeFile dest, data, 'utf8', cb
     
     
@@ -371,15 +406,14 @@ class exports.Compiler extends EventEmitter
                     else
                         c.log LOG.INFO, err
                         next null, false
-        c
+        return c
     
     @extended = (Subclass) ->
-        Superclass = this
+        Superclass        = this
         Subclass.run      = Superclass.run
         Subclass.extended = Superclass.extended
     
-    toString: ->
-        @id
+    toString: -> @id
 
 
 /**
@@ -408,11 +442,11 @@ class exports.ExternalCompiler extends Compiler
         
         cmd = if @preprocess then @preprocess @cmd, text, options else @cmd
         
-        @log LOG.INFO, "#{cmd}"
+        @log LOG.INFO, "#cmd"
         child = exec cmd, options,
             (err, stdout, stderr) ~>
                 if err
-                    cb new Error "#{this} error:\n#{err}"
+                    cb new Error "#this error:\n#err"
                 else
                     cb null, String stdout
         
@@ -505,8 +539,8 @@ class exports.JadeCompiler extends Compiler
     match       : /.html?$/i
     ext         : '.jade'
     module      : 'jade'
-    options     : -> { pretty:true, filename:@info.src }
-    compileSync : 'compile'
+    options     : (opts={}) -> { pretty:true, filename:@info.src } <<< opts
+    compile     : 'render'
     -> super ...
 
 
@@ -522,8 +556,10 @@ class exports.StylusCompiler extends Compiler
     
     -> super ...
     compile : (text, options={}, cb) ->
-        stylus = @module(text)
+        unless cb
+            [cb, options] = [options, {}]
         
+        stylus = @module(text)
         options.filename = @info.src
         for k, v in options
             if k is 'nib' and v
@@ -545,8 +581,8 @@ class exports.LessCompiler extends Compiler
     -> super ...
 
 
-class exports.SassJSCompiler extends Compiler
-    id          : 'sass_js'
+class exports.SassCompiler extends Compiler
+    id          : 'sass'
     match       : /\.css$/i
     ext         : '.sass'
     module      : 'sass'
@@ -563,9 +599,8 @@ class exports.SassRubyCompiler extends ExternalCompiler
     -> super ...
     preprocess: (cmd) ->
         cmd += " --load-path='#{path.dirname(@info.src)}'"
-        cmd + (if @info.options.sass_ruby.load_path then " --load-path='#{that}'" else '')
+        cmd + (if @info.options.sass_ruby.load_path then " --load-path='#that'" else '')
 
-# XXX: compress CSS with ?
 
 
 ### Misc Compilers
@@ -595,14 +630,14 @@ class exports.YamlCompiler extends ExternalCompiler
 cs = 
     CoffeeScriptCompiler
     CocoCompiler
-    CommonJSCompiler
     UglifyCompiler
     JadeCompiler
     StylusCompiler
     LessCompiler
-    SassJSCompiler
-    SassRubyCompiler
+    SassCompiler
     JisonCompiler
+    CommonJSCompiler
+    SassRubyCompiler
     YamlCompiler
 
 for c of cs then register c
@@ -637,3 +672,4 @@ function mkdirp (p, mode=8r0755, cb)
     err <- fs.mkdir p, mode
     if err?.code is 'EEXIST' then cb null else cb err
 
+exports.helpers = { expand:expand, mkdirp:mkdirp }

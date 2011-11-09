@@ -1,0 +1,17 @@
+CWD = process.cwd()
+{spawn, exec} = require 'child_process'
+
+run = (args) ->
+    args = args.split() if typeof args is 'string'
+    proc = spawn 'coco', args
+    proc.stderr.on 'data', say
+    proc       .on 'exit', -> process.exit it if it
+
+
+task \build 'build coco sources' ->
+    run <[ -bjc package.co ]>
+    run <[ -bc compiler.co ]>
+
+task \server 'Starts test-server for browser tests.' ->
+    server = require CWD+'test/server/server'
+
