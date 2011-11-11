@@ -35,22 +35,23 @@ exports.compilers = compilers = { __proto__: null }
 
 /** Default settings. */
 exports.DEFAULTS = DEFAULTS =
-    enabled          : []        # compiler_id[]
+    enabled          : []                       # compiler_id[]
     
-    src              : null      # str | str[] -- default: CWD
-    dest             : null      # str -- default: src
-    roots            : null      # src to dest pairs: { src:dest, ... } | [[src, dest], ...]
-    mount            : ''        # prefix trimmed off request path
+    src              : null                     # str | str[] -- default: CWD
+    dest             : null                     # str -- default: src
+    roots            : null                     # src to dest pairs: { src:dest, ... } | [[src, dest], ...]
+    mount            : ''                       # prefix trimmed off request path
     
-    delta            : null      # delta secs of mtime for file to be stale
-    expires          : false     # automatically treat files as stale if this old in secs
+    delta            : null                     # delta secs of mtime for file to be stale
+    expires          : false                    # automatically treat files as stale if this old in secs
     
-    log_level        : 'WARN'    # Logging verbosity.
-    create_dirs      : true      # if dest dir is missing, create it?
-    external_timeout : 3000      # ms after which to kill subprocess commands
-    cascade          : false     # invoke all compilers that match? otherwise, only first.
-    resolve_index    : false     # if true-y, resolve directories to this filename: false | true => 'index.html' | str
-    allowed_methods  : [ 'GET' ] # HTTP methods compiler should process
+    log_level        : 'WARN'                   # Logging verbosity.
+    create_dirs      : true                     # if dest dir is missing, create it?
+    external_timeout : 3000                     # ms after which to kill subprocess commands
+    cascade          : false                    # invoke all compilers that match? otherwise, only first.
+    ignore           : /\.(jpe?g|gif|png)$/i    # Requests matching this pattern are ignored, and no compiler matching occurs.
+    resolve_index    : false                    # if true-y, resolve directories to this filename: false | true => 'index.html' | str
+    allowed_methods  : [ 'GET' ]                # HTTP methods compiler should process
     
     # TODO (maybe)
     # on               : null      # event handlers to add: { event : handler, ... }
@@ -127,7 +128,7 @@ class exports.CompilerMiddleware extends EventEmitter
     
     respond: (req, res, next) ->
         settings = @settings
-        if settings.allowed_methods.indexOf(req.method) is -1
+        if settings.allowed_methods.indexOf(req.method) is -1 or settings.ignore?.test req.url
             return next()
         
         request =
@@ -229,8 +230,9 @@ exports.register = register = (NewCompiler) ->
  */
 class exports.Compiler extends EventEmitter
     id      : ''       # [required] unique id used to enable compiler.
-    match   : /\.js$/i # pattern used by `matches()` to test request path and to create source path (with `ext`).
+    match   : /\.mod(\.min)?\.js$/i # pattern used by `matches()` to test request path and to create source path (with `ext`).
     ext     : ''       # replacement pattern used by `matches()` to create source path (with `match`).
+    destExt : null     # extension used for the rendered file. if false, the file will match the request pathname.
     module  : null     # module for this compiler; if string and true-y, module will be `require`-ed.
     options : null     # options passed to `compile()` or `compileSync()` call as second argument if present; if it is a function, it will be called
     wraps   : false    # compiler id of which to wrap the output
@@ -256,7 +258,7 @@ class exports.Compiler extends EventEmitter
             level_name = if LOG.levelToString level then that else ''
             name = String(this)
             name += '\t' if name.length < 8
-            console.log "\t#level_name\t#name\t", ...msgs
+            console.log "\t#level_name\t#name\t#{@info.path}\t", ...msgs
         true
     
     
@@ -268,7 +270,7 @@ class exports.Compiler extends EventEmitter
      */
     matches: (srcDir, pathname) ->
         @log LOG.DEBUG, "matches(#srcDir, #pathname)"
-        path.join(srcDir, pathname).replace(@match, @ext) if @match.exec(pathname)
+        path.join srcDir, pathname.replace(@match, @ext) if @match.exec(pathname)
     
     srcValid: (src, cb) ->
         fs.stat src, cb
@@ -295,7 +297,7 @@ class exports.Compiler extends EventEmitter
      * @returns {String} Resolved dest path.
      */
     lookup: (src, destDir, pathname) ->
-        path.join destDir, pathname
+        path.join destDir, if @destExt then pathname.replace(@match, @destExt) else pathname
     
     destValid: (dest, cb) ->
         @log LOG.DEBUG, "destValid( #dest, #{typeof cb} )"
@@ -462,6 +464,7 @@ class exports.ExternalCompiler extends Compiler
 class exports.CoffeeScriptCompiler extends Compiler
     id          : 'coffee'
     ext         : '.coffee'
+    destExt     : '.js'
     module      : 'coffee-script'
     options     : { bare:true }
     compileSync : 'compile'
@@ -471,6 +474,7 @@ class exports.CoffeeScriptCompiler extends Compiler
 class exports.CocoCompiler extends Compiler
     id          : 'coco'
     ext         : '.co'
+    destExt     : '.js'
     module      : 'coco'
     options     : { bare:true }
     compileSync : 'compile'
@@ -483,7 +487,8 @@ class exports.CommonJSCompiler extends Compiler
     
     id         : 'commonjs'
     match      : /\.mod(\.min)?\.js$/i
-    ext        : [ '.co', '.coffee', '.jison', '.js' ]
+    ext        : [ '.js', '.co', '.coffee', '.jison' ]
+    destExt    : '.mod.js'
     ext2wraps:
         co     : 'coco'
         coffee : 'coffee'
@@ -497,12 +502,12 @@ class exports.CommonJSCompiler extends Compiler
         ( src.replace(@match, ext) for ext of @ext ) if @match.exec(pathname)
     
     # trim off .min if present
-    lookup: (src, destDir, pathname) ->
-        path.join(destDir, pathname).replace(@match, '.mod.js')
+    # lookup: (src, destDir, pathname) ->
+    #     path.join(destDir, pathname).replace(@match, '.mod.js')
     
     compileSync: (data) ->
         drop = @info.drop_path_parts ? @drop_path_parts
-        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js$/i, '').split('/').slice(drop)
+        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js([?#].*)?$/i, '').split('/').slice(drop)
         mod_parts.pop() if mod_parts[mod_parts.length] is 'index'
         mod_id = path.normalize mod_parts.join('/')
         
@@ -511,7 +516,7 @@ class exports.CommonJSCompiler extends Compiler
     
     doCompile: (text, wrapped, cb) ->
         ext = /\.([^\.]+)$/.exec(@info.src)[1]
-        @wraps = that if @ext2wraps[ext]
+        @wraps = @ext2wraps[ext]
         super ...
 
 
@@ -536,7 +541,7 @@ class exports.UglifyCompiler extends Compiler
 
 class exports.JadeCompiler extends Compiler
     id          : 'jade'
-    match       : /.html?$/i
+    match       : /\.html?$/i
     ext         : '.jade'
     module      : 'jade'
     options     : (opts={}) -> { pretty:true, filename:@info.src } <<< opts
