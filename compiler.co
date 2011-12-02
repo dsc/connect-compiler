@@ -1,18 +1,10 @@
-fs     = require 'fs'
-path   = require 'path'
-parse  = require('url').parse
+fs             = require 'fs'
+path           = require 'path'
+{parse}        = require 'url'
+{EventEmitter} = require 'events'
+{exec, spawn}  = require 'child_process'
 
-child_process = require 'child_process'
-exec          = child_process.exec
-spawn         = child_process.spawn
-
-EventEmitter  = require('events').EventEmitter
-
-Seq = require 'seq'
-
-
-
-
+Seq            = require 'seq'
 
 
 /**
@@ -137,6 +129,7 @@ class exports.CompilerMiddleware extends EventEmitter
             next : next
             url  : req.url
             path : parse(req.url).pathname
+        request.basename = path.basename request.path
         
         if settings.mount and request.path.indexOf(settings.mount) is 0
             request.path.=slice(settings.mount.length)
@@ -230,7 +223,7 @@ exports.register = register = (NewCompiler) ->
  */
 class exports.Compiler extends EventEmitter
     id      : ''       # [required] unique id used to enable compiler.
-    match   : /\.mod(\.min)?\.js$/i # pattern used by `matches()` to test request path and to create source path (with `ext`).
+    match   : /(?:\.mod)?(\.min)?\.js$/i # pattern used by `matches()` to test request path and to create source path (with `ext`).
     ext     : ''       # replacement pattern used by `matches()` to create source path (with `match`).
     destExt : null     # extension used for the rendered file. if false, the file will match the request pathname.
     module  : null     # module for this compiler; if string and true-y, module will be `require`-ed.
@@ -256,9 +249,18 @@ class exports.Compiler extends EventEmitter
     log: (level, ...msgs) ->
         if @info.log_level <= level
             level_name = if LOG.levelToString level then that else ''
-            name = String(this)
-            name += '\t' if name.length < 8
-            console.log "\t#level_name\t#name\t#{@info.path}\t", ...msgs
+            
+            compiler = String(this)
+            compiler += if compiler.length < 8 then '\t' else ''
+            
+            file = @info.path #@info.basename
+            len = file.length
+            while len < 48
+                len  += 8
+                file += '\t'
+            # file += '\t' if file.length < 8
+            
+            console.log "\t#level_name\t#compiler\t#file\t", ...msgs
         true
     
     
@@ -398,7 +400,7 @@ class exports.Compiler extends EventEmitter
                 .seq (text) -> c.doCompile text, this
                 .seq (data) -> c.write info.dest, data, this
                 .seq ->
-                    c.log LOG.INFO, 'Success!'
+                    c.log LOG.DEBUG, 'Success!'
                     next null, true
                 .catch (err) ->
                     @die()
@@ -406,7 +408,7 @@ class exports.Compiler extends EventEmitter
                         c.log LOG.ERROR, 'Error:', (err.stack or err.message or err.msg or err)
                         next err
                     else
-                        c.log LOG.INFO, err
+                        c.log LOG.DEBUG, err
                         next null, false
         return c
     
@@ -444,7 +446,7 @@ class exports.ExternalCompiler extends Compiler
         
         cmd = if @preprocess then @preprocess @cmd, text, options else @cmd
         
-        @log LOG.INFO, "#cmd"
+        @log LOG.DEBUG, "#cmd"
         child = exec cmd, options,
             (err, stdout, stderr) ~>
                 if err
@@ -452,7 +454,7 @@ class exports.ExternalCompiler extends Compiler
                 else
                     cb null, String stdout
         
-        child.stderr.on 'data', (data) ~> @log LOG.INFO, data
+        child.stderr.on 'data', (data) ~> @log LOG.WARN, data
         child.stdin.write text
         child.stdin.end()
 
@@ -568,7 +570,8 @@ class exports.StylusCompiler extends Compiler
         options.filename = @info.src
         for k, v in options
             if k is 'nib' and v
-                stylus.use nib()
+                @nib = require 'nib' unless @nib
+                stylus.use @nib()
             else if <[ use import include ]>.indexOf(k) is not -1
                 stylus[k](v)
             else
