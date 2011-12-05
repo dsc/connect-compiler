@@ -365,7 +365,15 @@ class exports.Compiler extends EventEmitter
     
     
     write: (dest, data, cb) ->
-        @log LOG.INFO, "writing #{@info.src} --> #dest"
+        if @info.log_level <= LOG.INFO
+            prefix = commonPath @info.src, dest
+            len    = prefix.length
+            if prefix.indexOf @info.cwd is 0
+                prefix .= slice @info.cwd.length+1
+            if len
+                @log LOG.INFO, "writing #prefix{ #{@info.src.slice len} --> #{dest.slice len} }"
+            else
+                @log LOG.INFO, "writing #{@info.src} --> #dest"
         fs.writeFile dest, data, 'utf8', cb
     
     
@@ -454,7 +462,7 @@ class exports.ExternalCompiler extends Compiler
                 else
                     cb null, String stdout
         
-        child.stderr.on 'data', (data) ~> @log LOG.WARN, data
+        child.stderr.on 'data', (data) ~> @log LOG.WARN, "\n#data"
         child.stdin.write text
         child.stdin.end()
 
@@ -654,7 +662,9 @@ for c of cs then register c
 
 ### Helpers
 
-expand = (...parts) ->
+helpers = exports.helpers = {}
+
+helpers.expand = expand = (...parts) ->
     p = path.normalize path.join ...parts
     if p.indexOf('~') is 0
         home = process.env.HOME or process.env.HOMEPATH
@@ -662,7 +672,47 @@ expand = (...parts) ->
     path.resolve p
 
 
-function mkdirp (p, mode=8r0755, cb)
+# Finds the longest common prefix of some number of Indexables (Arrays or Strings).
+#   An Indexable is anything which:
+#   - supports indexed lookup like `list[0]`
+#   - has a numeric `length` property
+#   - has methods `.sort()`, `.slice(start[, stop])`
+helpers.extrema = extrema = (its) ->
+    return []               if not its?.length
+    return [its[0], its[0]] if its.length < 2
+    by_length = ( [it.length, it] for it of its ).sort()
+    return [ by_length[0][1], by_length[*-1][1] ]
+
+
+helpers.commonPrefix = commonPrefix = (...lists) ->
+    return ''       if not lists?.length
+    return lists[0] if lists.length < 2
+    [ shortest, longest ] = extrema(lists)
+    
+    if shortest is longest
+        return longest
+    
+    for c, i of shortest
+        return shortest.slice(0, i) if c != longest[i]
+    return shortest
+
+
+helpers.commonPath = commonPath = (...paths) ->
+    return ''       if not paths?.length
+    return paths[0] if paths.length < 2
+    
+    [ shortest, longest ] = extrema(paths)
+    prefix = commonPrefix(...paths)
+    
+    # ...now ensure it's a full component
+    if prefix.charAt(prefix.length-1) is '/'
+        prefix = prefix.slice 0, -1
+    
+    components = commonPrefix prefix.split('/'), longest.split('/')
+    return components.join('/')+'/'
+
+
+helpers.mkdirp = mkdirp = function mkdirp (p, mode=8r0755, cb)
     [cb, mode] = [mode, 8r0755] if typeof mode is 'function'
     cb or= (->)
     p = expand(p)
@@ -680,4 +730,3 @@ function mkdirp (p, mode=8r0755, cb)
     err <- fs.mkdir p, mode
     if err?.code is 'EEXIST' then cb null else cb err
 
-exports.helpers = { expand:expand, mkdirp:mkdirp }
