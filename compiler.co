@@ -149,7 +149,7 @@ class exports.CompilerMiddleware extends EventEmitter
         log_prefix = ">>>>    [compiler]"
         console.log "#log_prefix Looking up compilers for '#{request.path}'..." if settings.log_level <= LOG.DEBUG
         
-        try do
+        try
             Seq(settings.enabled)
                 .seqEach (id, i) ->
                     C = compilers[id]
@@ -260,7 +260,7 @@ class exports.Compiler extends EventEmitter
                 file += '\t'
             # file += '\t' if file.length < 8
             
-            console.log "\t#level_name\t#compiler\t#file\t", ...msgs
+            console.log "#level_name\t#compiler\t#file\t", ...msgs
         true
     
     
@@ -643,8 +643,7 @@ class exports.YamlCompiler extends ExternalCompiler
 
 # Register Compilers
 
-cs = 
-    CoffeeScriptCompiler
+[   CoffeeScriptCompiler
     CocoCompiler
     UglifyCompiler
     JadeCompiler
@@ -655,8 +654,9 @@ cs =
     CommonJSCompiler
     SassRubyCompiler
     YamlCompiler
+].map register
 
-for c of cs then register c
+
 
 
 

@@ -1,15 +1,21 @@
 # todo
 
-- **Bug:** compiler errors sometimes propagate to node?! well shit son, somebody needs tests.
+
+## to ship
+
+- Validate compiler module exists on startup
+- Restructure middleware responder to use events to trigger compiler phases, remove `seq` due to need of `@die`. (State machine?)
+- Allow nested `enabled` list for a more sane `cascade`
+    - Rename `enabled` to `compilers`
+    - Allow entries in `compilers` to be an identifier or a options/config object
+- Add post-`write()` cleanup/finally event (which fires whether successful or not).
+
 - Remove `yaml-python`, `CommonJS` compilers and create a `connect-compiler-extras` package for myself.
 
+
 ## later
-- Make `setup()` a simple proxy to `CompilerMiddleware` class.
-- Restructure middleware responder to use events to trigger compiler phases, remove `seq`. State machine?
-- Add post-`write()` cleanup/finally event (which fires whether successful or not).
-- Config: `on` for attaching event handlers to compiler phases
-- Replace `#token` in config Strings.
-- Allow nested `enabled` list for a more sane `cascade`
+- Compile `./src` (coco) -> `./lib` (js)
+- Move compilers to `lib/compilers.co`
 
 
 ## docs
