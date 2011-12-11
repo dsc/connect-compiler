@@ -491,45 +491,6 @@ class exports.CocoCompiler extends Compiler
     -> super ...
 
 
-class exports.CommonJSCompiler extends Compiler
-    CJS_HEADER : "require.install('{ID}', function(require, exports, module, undefined){\n\n"
-    CJS_FOOTER : "\n\n});\n"
-    
-    id         : 'commonjs'
-    match      : /\.mod(\.min)?\.js$/i
-    ext        : [ '.js', '.co', '.coffee', '.jison' ]
-    destExt    : '.mod.js'
-    ext2wraps:
-        co     : 'coco'
-        coffee : 'coffee'
-        jison  : 'jison'
-    drop_path_parts : 0 # allows you to drop the mountpoint if your js files live in, say, /js
-    
-    -> super ...
-    
-    matches: (srcDir, pathname) ->
-        src = path.join srcDir, pathname
-        ( src.replace(@match, ext) for ext of @ext ) if @match.exec(pathname)
-    
-    # trim off .min if present
-    # lookup: (src, destDir, pathname) ->
-    #     path.join(destDir, pathname).replace(@match, '.mod.js')
-    
-    compileSync: (data) ->
-        drop = @info.drop_path_parts ? @drop_path_parts
-        mod_parts = @info.url.slice(1).replace(/\.mod(\.min)?\.js([?#].*)?$/i, '').split('/').slice(drop)
-        mod_parts.pop() if mod_parts[mod_parts.length] is 'index'
-        mod_id = path.normalize mod_parts.join('/')
-        
-        header = @CJS_HEADER.replace '{ID}', mod_id
-        header+data+@CJS_FOOTER
-    
-    doCompile: (text, wrapped, cb) ->
-        ext = /\.([^\.]+)$/.exec(@info.src)[1]
-        @wraps = @ext2wraps[ext]
-        super ...
-
-
 class exports.UglifyCompiler extends Compiler
     id          : 'uglify'
     match       : /\.min(\.mod)?\.js$/i,
@@ -632,12 +593,6 @@ class exports.JisonCompiler extends Compiler
         parser.generate()
 
 
-class exports.YamlCompiler extends ExternalCompiler
-    id          : 'yaml'
-    match       : /\.json$/i
-    ext         : '.yaml'
-    cmd         : "python -c 'import lessly.data.yaml_omap; import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout)'"
-    -> super ...
 
 
 
@@ -651,9 +606,7 @@ class exports.YamlCompiler extends ExternalCompiler
     LessCompiler
     SassCompiler
     JisonCompiler
-    CommonJSCompiler
     SassRubyCompiler
-    YamlCompiler
 ].map register
 
 
