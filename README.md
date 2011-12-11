@@ -221,7 +221,7 @@ enable (`enabled`). Most uses will also specify a source directory (`src`).
                 <code>RegExp</code>
             </td>
             <td>
-                <code>/\.(jpe?g!gif!png)$/i</code>
+                <code>/\.(jpe?g|gif|png)$/i</code>
             </td>
             <td>
                 Requests matching this pattern are short-circuit ignored, and no compiler matching occurs.
