@@ -1,19 +1,15 @@
 # todo
 
+## bugs
 
-## to ship
+## later
 
-- Validate compiler module exists on startup
+- Validate compiler module exists on startup in a way that still allows `@wraps` to work right
 - Restructure middleware responder to use events to trigger compiler phases, remove `seq` due to need of `@die`. (State machine?)
 - Allow nested `enabled` list for a more sane `cascade`
     - Rename `enabled` to `compilers`
     - Allow entries in `compilers` to be an identifier or a options/config object
 - Add post-`write()` cleanup/finally event (which fires whether successful or not).
-
-- Remove `yaml-python`, `CommonJS` compilers and create a `connect-compiler-extras` package for myself.
-
-
-## later
 - Compile `./src` (coco) -> `./lib` (js)
 - Move compilers to `lib/compilers.co`
 

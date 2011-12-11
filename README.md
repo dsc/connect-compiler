@@ -23,22 +23,29 @@ Usage is the same as all other `connect` middleware:
     server.listen(6969);
 ````
 
+Of note, earlier versions of `connect` actually came with a module like this, but they do not any longer.
+
 
 ## Settings
 
-The compiler middleware takes a settings object, minimally containing a list of compilers to enable (`enabled`). Most uses will also specify a source directory (`src`).
+The compiler middleware takes a settings object, minimally containing a list of compilers to 
+enable (`enabled`). Most uses will also specify a source directory (`src`).
 
 <table>
-    <col>
-    <col width="25%">
-    <col>
-    <col width="50%">
     <thead>
         <tr>
-            <th>name</th>
-            <th>type</th>
-            <th>default</th>
-            <th>description</th>
+            <th>
+                name
+            </th>
+            <th>
+                type
+            </th>
+            <th>
+                default
+            </th>
+            <th>
+                description
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -49,9 +56,7 @@ The compiler middleware takes a settings object, minimally containing a list of 
             <td>
                 <code>String</code>, <code>String[]</code>
             </td>
-            <td>
-                
-            </td>
+            <td></td>
             <td>
                 <strong>Required</strong> Enabled compiler id(s). See below for included compilers.
             </td>
@@ -78,7 +83,7 @@ The compiler middleware takes a settings object, minimally containing a list of 
                 <code>String</code>
             </td>
             <td>
-                <code>src</code><br>
+                <code>src</code> or<br>
                 <code>src[0]</code> if Array
             </td>
             <td>
@@ -90,11 +95,12 @@ The compiler middleware takes a settings object, minimally containing a list of 
                 <strong>roots</strong>
             </td>
             <td>
-                <code>{src:dest, ...}</code>, <br> <code>[[src, dest], ...]</code>
+                <code>{src:dest, ...}</code>,<br>
+                <code>[[src, dest], ...]</code>
             </td>
             <td></td>
             <td>
-                Allows you to specify multiple, ordered <code>src</code>-<code>dest</code> pairs. Only one of <code>roots</code> or <code>src</code> is required; <code>roots</code> takes precedence over <code>src</code> if present.
+                Allows you to specify multiple, ordered <code>src</code>-<code>dest</code> pairs. One of <code>roots</code> or <code>src</code> is required; <code>roots</code> takes precedence over <code>src</code> if present.
             </td>
         </tr>
         <tr>
@@ -105,7 +111,7 @@ The compiler middleware takes a settings object, minimally containing a list of 
                 <code>String</code> , <code>Number</code>
             </td>
             <td>
-                <code>warn</code>
+                <code>WARN</code>
             </td>
             <td>
                 Logging verbosity. Valid values (case-insensitive): <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug</code>, <code>silent</code>, or a numeric constant (as found in <code>LOG</code>).
@@ -209,6 +215,20 @@ The compiler middleware takes a settings object, minimally containing a list of 
         </tr>
         <tr>
             <td>
+                <strong>ignore</strong>
+            </td>
+            <td>
+                <code>RegExp</code>
+            </td>
+            <td>
+                <code>/\.(jpe?g!gif!png)$/i</code>
+            </td>
+            <td>
+                Requests matching this pattern are short-circuit ignored, and no compiler matching occurs.
+            </td>
+        </tr>
+        <tr>
+            <td>
                 <strong>allowed_methods</strong>
             </td>
             <td>
@@ -240,56 +260,48 @@ The compiler middleware takes a settings object, minimally containing a list of 
 
 ## Compilers
 
--   ### CoffeeScriptCompiler
-    
-    
--   ### CocoCompiler
-    
-    
--   ### CommonJSCompiler
-    
-    
--   ### UglifyCompiler
-    
-    
--   ### JadeCompiler
-    
-    
--   ### StylusCompiler
-    
-    
--   ### LessCompiler
-    
-    
--   ### SassJSCompiler
-    
-    
--   ### SassRubyCompiler
-    
-    
--   ### JisonCompiler
-    
-    
--   ### YamlCompiler
-    
-    
+To enable a compiler, you specify its `id`, which you can get from the handy list that follows. Some
+compilers take options, which you pass using the `options` setting using the compiler `id` as the
+key.
 
-## API
+For example, to disable the `bare` option for the CoffeeScript compiler, you'd do something like:
 
--   ### CompilerMiddleware(settings={}, ...custom)
-    
-    
--   ### Compiler
-    
-    
--   ### ExternalCompiler
-    
-    
+````js
+server = connect.createServer(
+    compiler({
+        src     : 'src'
+        dest    : 'var'
+        enabled : [ 'coffee' ],
+        options : {
+            'coffee' : {
+                'bare' : false
+            }
+        }
+    }),
+    connect.static(__dirname + '/public'),
+    connect.static(__dirname + '/var')
+)
+````
 
+### Compiler IDs
+
+-   [CoffeeScript](http://coffeescript.org/) Compiler: `coffee`
+-   [Coco](http://satyr.github.com/coco/) Compiler: `coco`
+-   [Uglify](https://github.com/mishoo/UglifyJS) Compiler: `uglify`
+-   [Jade](http://jade-lang.com/) Compiler: `jade`
+-   [Stylus](http://learnboost.github.com/stylus/) Compiler: `stylus`
+-   [Less](http://lesscss.org/) Compiler: `less`
+-   [Sass](http://sass-lang.com/) Compiler: `sass` -- Using [sass.js](https://github.com/visionmedia/sass.js).
+-   [SassRuby](http://sass-lang.com/) Compiler: `sass_ruby` -- External compiler using a shell command to 
+    the [Ruby version of Sass](http://sass-lang.com/download.html) (which you must install that part yourself).
+-   [Jison](http://zaach.github.com/jison/) Compiler: `jison`
 
 
 ## Feedback
 
+Find a bug or want to contribute? Open a ticket on [github](http://github.com/dsc/connect-compiler). 
+You're also welcome to send me email at [dsc@less.ly](mailto:dsc@less.ly?subject=connect-compiler).
 
-
+If you're interested in contributing, note that at the moment, a version of `node-seq` is checked in under 
+`node_modules` while we wait for a pull request to be pulled into `master`.
 
