@@ -25,6 +25,22 @@ Usage is the same as all other `connect` middleware:
 
 Of note, earlier versions of `connect` actually came with a module like this, but they do not any longer.
 
+## Installation
+
+Via [npm](http://npmjs.org/):
+
+````sh
+npm install connect-compiler
+````
+
+Or if you want to hack on the source:
+
+````sh
+git clone https://github.com/dsc/connect-compiler.git
+cd connect-compiler
+npm link
+````
+
 
 ## Settings
 
