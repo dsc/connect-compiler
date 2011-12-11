@@ -5,7 +5,7 @@ homepage            : 'http://dsc.github.com/connect-compiler'
 keywords            : <[ connect middleware compiler development coffee-script coco jade stylus less css minify ]>
 author              : 'David Schoonover (dsc@less.ly) <http://less.ly>'
 
-main                : './compiler'
+main                : './compiler.js'
 dependencies :
     'seq'           : '>= 0.3.4'
 devDependencies :

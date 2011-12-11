@@ -17,7 +17,7 @@
     "minify"
   ],
   "author": "David Schoonover (dsc@less.ly) <http://less.ly>",
-  "main": "./compiler",
+  "main": "./compiler.js",
   "dependencies": {
     "seq": ">= 0.3.4"
   },
