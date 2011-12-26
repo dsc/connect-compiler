@@ -7,7 +7,8 @@ author              : 'David Schoonover (dsc@less.ly) <http://less.ly>'
 
 main                : './compiler.js'
 dependencies :
-    'seq'           : '>= 0.3.4'
+    'seq'           : 'https://github.com/dsc/node-seq/tarball/master'
+    # 'seq'           : '>= 0.3.5'
 devDependencies :
     'express'       : '>= 2.5.1'
     'coco'          : '>= 0.6.7'

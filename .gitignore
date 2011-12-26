@@ -1,0 +1,11 @@
+.DS_Store
+Icon?
+
+node_modules/
+node_modules/*
+npm-debug.log
+*.sass-cache
+lib-cov
+test/*.log
+test/fixtures/*.json
+test/fixtures/logs/*.log
