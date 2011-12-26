@@ -1,5 +1,5 @@
 name                : 'connect-compiler'
-version             : '0.1.0'
+version             : '0.1.1'
 description         : 'Dynamically recompile stale assets'
 homepage            : 'http://dsc.github.com/connect-compiler'
 keywords            : <[ connect middleware compiler development coffee-script coco jade stylus less css minify ]>
