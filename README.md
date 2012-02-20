@@ -11,9 +11,9 @@ Usage is the same as all other `connect` middleware:
     ,   server = connect.createServer(
             connect.logger(),
             compiler({
-                src     : 'src'
+                enabled : [ 'coffee', 'uglify' ],
+                src     : 'src',
                 dest    : 'var'
-                enabled : [ 'coffee', 'uglify' ]
             }),
             connect.static(__dirname + '/public'),
             connect.static(__dirname + '/var')
@@ -23,7 +23,8 @@ Usage is the same as all other `connect` middleware:
     server.listen(6969);
 ````
 
-Of note, earlier versions of `connect` actually came with a module like this, but they do not any longer.
+Of note, earlier versions of `connect` actually came with a module like this, but not any longer.
+
 
 ## Installation
 
@@ -285,9 +286,9 @@ For example, to disable the `bare` option for the CoffeeScript compiler, you'd d
 ````js
 server = connect.createServer(
     compiler({
-        src     : 'src'
-        dest    : 'var'
         enabled : [ 'coffee' ],
+        src     : 'src',
+        dest    : 'var',
         options : {
             'coffee' : {
                 'bare' : false
@@ -309,7 +310,7 @@ server = connect.createServer(
 -   [Less](http://lesscss.org/) Compiler: `less`
 -   [Sass](http://sass-lang.com/) Compiler: `sass` -- Using [sass.js](https://github.com/visionmedia/sass.js).
 -   [SassRuby](http://sass-lang.com/) Compiler: `sass_ruby` -- External compiler using a shell command to 
-    the [Ruby version of Sass](http://sass-lang.com/download.html) (which you must install that part yourself).
+    the [Ruby version of Sass](http://sass-lang.com/download.html) (install via `gem install sass`).
 -   [Jison](http://zaach.github.com/jison/) Compiler: `jison`
 
 
@@ -317,7 +318,4 @@ server = connect.createServer(
 
 Find a bug or want to contribute? Open a ticket on [github](http://github.com/dsc/connect-compiler). 
 You're also welcome to send me email at [dsc@less.ly](mailto:dsc@less.ly?subject=connect-compiler).
-
-If you're interested in contributing, note that at the moment, a version of `node-seq` is checked in under 
-`node_modules` while we wait for a pull request to be pulled into `master`.
 
