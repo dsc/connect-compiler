@@ -19,8 +19,8 @@
 - GitHub site with introduction, documentation.
 - examples:
     - simple usage
-        - with connect
-        - with express
+        - with `connect`
+        - with `express`
     - recursive compiling (CommonJS, Uglify; @wraps)
     - custom compilers
         - extending an existing compiler

@@ -22,7 +22,6 @@
     "seq": "https://github.com/dsc/node-seq/tarball/master"
   },
   "devDependencies": {
-    "expresso": ">= 0.9.2",
     "express": ">= 2.5.8",
     "coco": ">= 0.7.0",
     "coffee-script": ">= 1.2.0",
@@ -30,7 +29,8 @@
     "stylus": ">= 0.24.0",
     "nib": ">= 0.3.2",
     "less": ">= 1.2.2",
-    "jison": ">= 0.3.2"
+    "jison": ">= 0.3.2",
+    "expresso": ">= 0.9.2"
   },
   "scripts": {
     "test": "expresso"
@@ -43,7 +43,7 @@
     "url": "http://github.com/dsc/connect-compiler/issues"
   },
   "engine": {
-    "node": ">=0.4.0"
+    "node": ">=0.6.0"
   },
   "license": "MIT"
 }
