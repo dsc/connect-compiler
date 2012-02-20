@@ -80,21 +80,21 @@ exports.LOG = LOG = {
  * CompilerMiddleware class.
  * @class
  */
-exports.CompilerMiddleware = CompilerMiddleware = (function(_super){
+exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
   /**
    * @constructor
    * @param {Object} [settings={}] Settings object.
    * @param {Compiler[]} [custom=[]] List of custom compilers to add.
    */
   CompilerMiddleware.displayName = 'CompilerMiddleware';
-  var prototype = __extends(CompilerMiddleware, _super).prototype, constructor = CompilerMiddleware;
+  var prototype = __extend(CompilerMiddleware, superclass).prototype, constructor = CompilerMiddleware;
   function CompilerMiddleware(settings, custom){
     var srcDirs, destDir, src, dest, _ref, _res;
     settings == null && (settings = {});
     this.custom = custom != null
       ? custom
       : [];
-    CompilerMiddleware.superclass.call(this);
+    superclass.call(this);
     this.respond = this.respond.bind(this);
     this.settings = settings = __import(__import({}, DEFAULTS), settings);
     if (!settings.enabled || settings.enabled.length === 0) {
@@ -246,9 +246,9 @@ exports.register = register = function(NewCompiler){
  * 
  * @class
  */
-exports.Compiler = Compiler = (function(_super){
+exports.Compiler = Compiler = (function(superclass){
   Compiler.displayName = 'Compiler';
-  var prototype = __extends(Compiler, _super).prototype, constructor = Compiler;
+  var prototype = __extend(Compiler, superclass).prototype, constructor = Compiler;
   prototype.id = '';
   prototype.match = /(?:\.mod)?(\.min)?\.js$/i;
   prototype.ext = '';
@@ -265,7 +265,7 @@ exports.Compiler = Compiler = (function(_super){
   function Compiler(info){
     var k, v, mod, _own = {}.hasOwnProperty;
     this.info = info;
-    Compiler.superclass.call(this);
+    superclass.call(this);
     for (k in this) if (_own.call(this, k)) {
       v = this[k];
       if (typeof v === 'function') {
@@ -414,7 +414,11 @@ exports.Compiler = Compiler = (function(_super){
       if (typeof fn !== 'function') {
         fn = this.module[fn];
       }
-      return cb(null, fn.apply(this, args));
+      try {
+        return cb(null, fn.apply(this, args));
+      } catch (err) {
+        return cb(err);
+      }
     } else {
       return cb(new Error('No compile function defined!?'));
     }
@@ -509,9 +513,9 @@ exports.Compiler = Compiler = (function(_super){
 /**
  * Executes a shell command, piping the text through stdin, and capturing stdout.
  */
-exports.ExternalCompiler = ExternalCompiler = (function(_super){
+exports.ExternalCompiler = ExternalCompiler = (function(superclass){
   ExternalCompiler.displayName = 'ExternalCompiler';
-  var prototype = __extends(ExternalCompiler, _super).prototype, constructor = ExternalCompiler;
+  var prototype = __extend(ExternalCompiler, superclass).prototype, constructor = ExternalCompiler;
   prototype.id = 'external';
   prototype.env = null;
   prototype.cwd = null;
@@ -519,7 +523,7 @@ exports.ExternalCompiler = ExternalCompiler = (function(_super){
   prototype.cmd = null;
   prototype.preprocess = null;
   function ExternalCompiler(){
-    ExternalCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
     var info_options, cmd, child, _ref, _this = this;
@@ -557,9 +561,9 @@ exports.ExternalCompiler = ExternalCompiler = (function(_super){
   };
   return ExternalCompiler;
 }(Compiler));
-exports.CoffeeScriptCompiler = CoffeeScriptCompiler = (function(_super){
+exports.CoffeeScriptCompiler = CoffeeScriptCompiler = (function(superclass){
   CoffeeScriptCompiler.displayName = 'CoffeeScriptCompiler';
-  var prototype = __extends(CoffeeScriptCompiler, _super).prototype, constructor = CoffeeScriptCompiler;
+  var prototype = __extend(CoffeeScriptCompiler, superclass).prototype, constructor = CoffeeScriptCompiler;
   prototype.id = 'coffee';
   prototype.ext = '.coffee';
   prototype.destExt = '.js';
@@ -569,13 +573,13 @@ exports.CoffeeScriptCompiler = CoffeeScriptCompiler = (function(_super){
   };
   prototype.compileSync = 'compile';
   function CoffeeScriptCompiler(){
-    CoffeeScriptCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   return CoffeeScriptCompiler;
 }(Compiler));
-exports.CocoCompiler = CocoCompiler = (function(_super){
+exports.CocoCompiler = CocoCompiler = (function(superclass){
   CocoCompiler.displayName = 'CocoCompiler';
-  var prototype = __extends(CocoCompiler, _super).prototype, constructor = CocoCompiler;
+  var prototype = __extend(CocoCompiler, superclass).prototype, constructor = CocoCompiler;
   prototype.id = 'coco';
   prototype.ext = '.co';
   prototype.destExt = '.js';
@@ -585,19 +589,19 @@ exports.CocoCompiler = CocoCompiler = (function(_super){
   };
   prototype.compileSync = 'compile';
   function CocoCompiler(){
-    CocoCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   return CocoCompiler;
 }(Compiler));
-exports.UglifyCompiler = UglifyCompiler = (function(_super){
+exports.UglifyCompiler = UglifyCompiler = (function(superclass){
   UglifyCompiler.displayName = 'UglifyCompiler';
-  var prototype = __extends(UglifyCompiler, _super).prototype, constructor = UglifyCompiler;
+  var prototype = __extend(UglifyCompiler, superclass).prototype, constructor = UglifyCompiler;
   prototype.id = 'uglify';
   prototype.match = /\.min(\.mod)?\.js$/i;
   prototype.ext = '$1.js';
   prototype.module = 'uglify-js';
   function UglifyCompiler(){
-    UglifyCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   prototype.compileSync = function(text){
     var ast;
@@ -608,9 +612,9 @@ exports.UglifyCompiler = UglifyCompiler = (function(_super){
   };
   return UglifyCompiler;
 }(Compiler));
-exports.JadeCompiler = JadeCompiler = (function(_super){
+exports.JadeCompiler = JadeCompiler = (function(superclass){
   JadeCompiler.displayName = 'JadeCompiler';
-  var prototype = __extends(JadeCompiler, _super).prototype, constructor = JadeCompiler;
+  var prototype = __extend(JadeCompiler, superclass).prototype, constructor = JadeCompiler;
   prototype.id = 'jade';
   prototype.match = /\.html?$/i;
   prototype.ext = '.jade';
@@ -624,19 +628,19 @@ exports.JadeCompiler = JadeCompiler = (function(_super){
   };
   prototype.compile = 'render';
   function JadeCompiler(){
-    JadeCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   return JadeCompiler;
 }(Compiler));
-exports.StylusCompiler = StylusCompiler = (function(_super){
+exports.StylusCompiler = StylusCompiler = (function(superclass){
   StylusCompiler.displayName = 'StylusCompiler';
-  var prototype = __extends(StylusCompiler, _super).prototype, constructor = StylusCompiler;
+  var prototype = __extend(StylusCompiler, superclass).prototype, constructor = StylusCompiler;
   prototype.id = 'stylus';
   prototype.match = /\.css$/i;
   prototype.ext = '.styl';
   prototype.module = 'stylus';
   function StylusCompiler(){
-    StylusCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
     var stylus, k, v, _ref;
@@ -663,41 +667,41 @@ exports.StylusCompiler = StylusCompiler = (function(_super){
   };
   return StylusCompiler;
 }(Compiler));
-exports.LessCompiler = LessCompiler = (function(_super){
+exports.LessCompiler = LessCompiler = (function(superclass){
   LessCompiler.displayName = 'LessCompiler';
-  var prototype = __extends(LessCompiler, _super).prototype, constructor = LessCompiler;
+  var prototype = __extend(LessCompiler, superclass).prototype, constructor = LessCompiler;
   prototype.id = 'less';
   prototype.match = /\.css$/i;
   prototype.ext = '.less';
   prototype.module = 'less';
   prototype.compile = 'render';
   function LessCompiler(){
-    LessCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   return LessCompiler;
 }(Compiler));
-exports.SassCompiler = SassCompiler = (function(_super){
+exports.SassCompiler = SassCompiler = (function(superclass){
   SassCompiler.displayName = 'SassCompiler';
-  var prototype = __extends(SassCompiler, _super).prototype, constructor = SassCompiler;
+  var prototype = __extend(SassCompiler, superclass).prototype, constructor = SassCompiler;
   prototype.id = 'sass';
   prototype.match = /\.css$/i;
   prototype.ext = '.sass';
   prototype.module = 'sass';
   prototype.compileSync = 'render';
   function SassCompiler(){
-    SassCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   return SassCompiler;
 }(Compiler));
-exports.SassRubyCompiler = SassRubyCompiler = (function(_super){
+exports.SassRubyCompiler = SassRubyCompiler = (function(superclass){
   SassRubyCompiler.displayName = 'SassRubyCompiler';
-  var prototype = __extends(SassRubyCompiler, _super).prototype, constructor = SassRubyCompiler;
+  var prototype = __extend(SassRubyCompiler, superclass).prototype, constructor = SassRubyCompiler;
   prototype.id = 'sass_ruby';
   prototype.match = /\.css$/i;
   prototype.ext = '.sass';
   prototype.cmd = 'sass --stdin --no-cache ';
   function SassRubyCompiler(){
-    SassRubyCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   prototype.preprocess = function(cmd){
     var that;
@@ -706,14 +710,14 @@ exports.SassRubyCompiler = SassRubyCompiler = (function(_super){
   };
   return SassRubyCompiler;
 }(ExternalCompiler));
-exports.JisonCompiler = JisonCompiler = (function(_super){
+exports.JisonCompiler = JisonCompiler = (function(superclass){
   JisonCompiler.displayName = 'JisonCompiler';
-  var prototype = __extends(JisonCompiler, _super).prototype, constructor = JisonCompiler;
+  var prototype = __extend(JisonCompiler, superclass).prototype, constructor = JisonCompiler;
   prototype.id = 'jison';
   prototype.ext = '.jison';
   prototype.module = 'jison';
   function JisonCompiler(){
-    JisonCompiler.superclass.apply(this, arguments);
+    superclass.apply(this, arguments);
   }
   prototype.compileSync = function(text){
     var parser;
@@ -825,9 +829,9 @@ helpers.mkdirp = mkdirp = (function(){
   }
   return mkdirp;
 }());
-function __extends(sub, sup){
-  function ctor(){} ctor.prototype = (sub.superclass = sup).prototype;
-  (sub.prototype = new ctor).constructor = sub;
+function __extend(sub, sup){
+  function fun(){} fun.prototype = (sub.superclass = sup).prototype;
+  (sub.prototype = new fun).constructor = sub;
   if (typeof sup.extended == 'function') sup.extended(sub);
   return sub;
 }

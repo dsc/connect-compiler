@@ -359,7 +359,10 @@ class exports.Compiler extends EventEmitter
             fn.apply this, args + [cb]
         else if fn = @compileSync
             fn = @module[fn] if typeof fn is not 'function'
-            cb null, fn.apply this, args
+            try
+                cb null, fn.apply this, args
+            catch err
+                cb err
         else
             cb new Error 'No compile function defined!?'
     

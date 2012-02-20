@@ -1,7 +1,7 @@
 CWD = process.cwd()
 {spawn, exec} = require 'child_process'
 
-run = (args) ->
+coco = (args) ->
     args = args.split() if typeof args is 'string'
     proc = spawn 'coco', args
     proc.stderr.on 'data', say
@@ -9,9 +9,9 @@ run = (args) ->
 
 
 task \build 'build coco sources' ->
-    run <[ -bjc package.co ]>
-    run <[ -bc compiler.co ]>
+    coco <[ -bjc package.co ]>
+    coco <[ -bc compiler.co ]>
 
 task \server 'Starts test-server for browser tests.' ->
-    server = require CWD+'test/server/server'
+    server = require "#CWD/test/server/server"
 
