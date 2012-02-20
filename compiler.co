@@ -518,9 +518,35 @@ class exports.JadeCompiler extends Compiler
     match       : /\.html?$/i
     ext         : '.jade'
     module      : 'jade'
-    options     : (opts={}) -> { pretty:true, filename:@info.src } <<< opts
+    options     : (opts={}) -> { +pretty, filename:@info.src } <<< opts
     compile     : 'render'
     -> super ...
+
+
+class exports.JadeBrowserPrecompiler extends Compiler
+    id          : 'jade-browser'
+    match       : /\.jade(?:\.mod)?(\.min)?\.js$/i
+    ext         : '.jade'
+    destExt     : '.jade.js'
+    module      : 'jade'
+    
+    options     : (opts={}) ->
+        # Turning on options.compileDebug is +40% (bytes) to the templater function
+        { +pretty, +client, -compileDebug, filename:@info.src } <<< opts
+    
+    -> super ...
+    compileSync : (text, options={}) ->
+        template_fn = @module.compile text, options
+        # Convert "anonymous" named function statement to function expression
+        template = String template_fn .replace /^function anonymous\(/, 'function \('
+        
+        """
+            var template = #template;
+            if (typeof module != 'undefined') {
+                module.exports = exports = template;
+            }
+        """
+    
 
 
 
@@ -605,6 +631,7 @@ class exports.JisonCompiler extends Compiler
     CocoCompiler
     UglifyCompiler
     JadeCompiler
+    JadeBrowserPrecompiler
     StylusCompiler
     LessCompiler
     SassCompiler

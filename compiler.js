@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, _ref, __slice = [].slice;
+var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, _ref, __slice = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -632,6 +632,35 @@ exports.JadeCompiler = JadeCompiler = (function(superclass){
   }
   return JadeCompiler;
 }(Compiler));
+exports.JadeBrowserPrecompiler = JadeBrowserPrecompiler = (function(superclass){
+  JadeBrowserPrecompiler.displayName = 'JadeBrowserPrecompiler';
+  var prototype = __extend(JadeBrowserPrecompiler, superclass).prototype, constructor = JadeBrowserPrecompiler;
+  prototype.id = 'jade-browser';
+  prototype.match = /\.jade(?:\.mod)?(\.min)?\.js$/i;
+  prototype.ext = '.jade';
+  prototype.destExt = '.jade.js';
+  prototype.module = 'jade';
+  prototype.options = function(opts){
+    opts == null && (opts = {});
+    return __import({
+      pretty: true,
+      client: true,
+      compileDebug: false,
+      filename: this.info.src
+    }, opts);
+  };
+  function JadeBrowserPrecompiler(){
+    superclass.apply(this, arguments);
+  }
+  prototype.compileSync = function(text, options){
+    var template_fn, template;
+    options == null && (options = {});
+    template_fn = this.module.compile(text, options);
+    template = String(template_fn).replace(/^function anonymous\(/, 'function (');
+    return "var template = " + template + ";\nif (typeof module != 'undefined') {\n    module.exports = exports = template;\n}";
+  };
+  return JadeBrowserPrecompiler;
+}(Compiler));
 exports.StylusCompiler = StylusCompiler = (function(superclass){
   StylusCompiler.displayName = 'StylusCompiler';
   var prototype = __extend(StylusCompiler, superclass).prototype, constructor = StylusCompiler;
@@ -726,7 +755,7 @@ exports.JisonCompiler = JisonCompiler = (function(superclass){
   };
   return JisonCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler].map(register);
+[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
