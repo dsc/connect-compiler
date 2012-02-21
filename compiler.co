@@ -622,6 +622,15 @@ class exports.JisonCompiler extends Compiler
         parser.generate()
 
 
+class exports.YamlCompiler extends Compiler
+    id          : 'yaml'
+    match       : /\.json$/i
+    ext         : '.yaml'
+    module      : 'js-yaml'
+    compileSync : (data) ->
+        JSON.stringify @module.loadAll data
+    -> super ...
+
 
 
 
@@ -637,6 +646,7 @@ class exports.JisonCompiler extends Compiler
     SassCompiler
     JisonCompiler
     SassRubyCompiler
+    YamlCompiler
 ].map register
 
 
