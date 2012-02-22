@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, _ref, __slice = [].slice;
+var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, _ref, __slice = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -755,7 +755,22 @@ exports.JisonCompiler = JisonCompiler = (function(superclass){
   };
   return JisonCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler].map(register);
+exports.YamlCompiler = YamlCompiler = (function(superclass){
+  YamlCompiler.displayName = 'YamlCompiler';
+  var prototype = __extend(YamlCompiler, superclass).prototype, constructor = YamlCompiler;
+  prototype.id = 'yaml';
+  prototype.match = /\.json$/i;
+  prototype.ext = '.yaml';
+  prototype.module = 'js-yaml';
+  prototype.compileSync = function(data){
+    return JSON.stringify(this.module.loadAll(data));
+  };
+  function YamlCompiler(){
+    superclass.apply(this, arguments);
+  }
+  return YamlCompiler;
+}(Compiler));
+[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
