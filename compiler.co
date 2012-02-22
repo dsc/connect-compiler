@@ -628,7 +628,7 @@ class exports.YamlCompiler extends Compiler
     ext         : '.yaml'
     module      : 'js-yaml'
     compileSync : (data) ->
-        JSON.stringify @module.loadAll data
+        JSON.stringify @module.load data
     -> super ...
 
 

@@ -763,7 +763,7 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
   prototype.ext = '.yaml';
   prototype.module = 'js-yaml';
   prototype.compileSync = function(data){
-    return JSON.stringify(this.module.loadAll(data));
+    return JSON.stringify(this.module.load(data));
   };
   function YamlCompiler(){
     superclass.apply(this, arguments);
