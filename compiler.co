@@ -484,6 +484,18 @@ class exports.CoffeeScriptCompiler extends Compiler
     -> super ...
 
 
+class exports.SnocketsCompiler extends Compiler
+    id          : 'snockets'
+    ext         : '.coffee'
+    destExt     : '.js'
+    module      : 'snockets'
+    options     : { async:false }
+    -> super ...
+    compileSync : (text, options={}) ->
+        snockets = new @module
+        snockets.getConcatenation @info.src, options
+
+
 class exports.CocoCompiler extends Compiler
     id          : 'coco'
     ext         : '.co'
@@ -637,6 +649,7 @@ class exports.YamlCompiler extends Compiler
 # Register Compilers
 
 [   CoffeeScriptCompiler
+    SnocketsCompiler
     CocoCompiler
     UglifyCompiler
     JadeCompiler
