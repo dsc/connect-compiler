@@ -303,6 +303,7 @@ server = connect.createServer(
 ### Compiler IDs
 
 -   [CoffeeScript](http://coffeescript.org/) Compiler: `coffee`
+-   [Snockets](http://github.com/TrevorBurnham/snockets) Compiler: `snockets`
 -   [Coco](http://satyr.github.com/coco/) Compiler: `coco`
 -   [Uglify](https://github.com/mishoo/UglifyJS) Compiler: `uglify`
 -   [Jade](http://jade-lang.com/) Compiler: `jade`
