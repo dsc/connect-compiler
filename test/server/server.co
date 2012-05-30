@@ -24,7 +24,7 @@ app.configure ->
     app.use express.methodOverride()
     
     app.use compiler do
-        enabled : <[ coco coffee jade stylus sass jison ]>
+        enabled : <[ coco coffee jade stylus sass jison mochiscript ]>
         src     : WWW
         dest    : VAR
         options :

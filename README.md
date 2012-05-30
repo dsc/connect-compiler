@@ -313,6 +313,7 @@ server = connect.createServer(
 -   [SassRuby](http://sass-lang.com/) Compiler: `sass_ruby` -- External compiler using a shell command to 
     the [Ruby version of Sass](http://sass-lang.com/download.html) (install via `gem install sass`).
 -   [Jison](http://zaach.github.com/jison/) Compiler: `jison`
+-   [Mochiscript](https://github.com/jeffsu/mochiscript) Compiler: `mochiscript`
 
 
 ## Feedback
