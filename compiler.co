@@ -520,6 +520,16 @@ class exports.UglifyCompiler extends Compiler
         
         @module.uglify.gen_code ast          # get compressed code
 
+class exports.MochiscriptCompiler extends Compiler
+    id          : 'mochiscript'
+    ext         : '.ms'
+    destExt     : '.js'
+    module      : 'mochiscript'
+    options     : { bare:true }
+    compileSync : 'compile'
+    -> super ...
+
+
 
 
 ### HTML Compilers
@@ -660,6 +670,7 @@ class exports.YamlCompiler extends Compiler
     JisonCompiler
     SassRubyCompiler
     YamlCompiler
+    MochiscriptCompiler
 ].map register
 
 
