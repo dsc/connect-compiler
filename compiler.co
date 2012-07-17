@@ -649,7 +649,6 @@ class exports.YamlCompiler extends Compiler
 # Register Compilers
 
 [   CoffeeScriptCompiler
-    SnocketsCompiler
     CocoCompiler
     UglifyCompiler
     JadeCompiler
@@ -660,6 +659,7 @@ class exports.YamlCompiler extends Compiler
     JisonCompiler
     SassRubyCompiler
     YamlCompiler
+    SnocketsCompiler
 ].map register
 
 

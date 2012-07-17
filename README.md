@@ -303,7 +303,6 @@ server = connect.createServer(
 ### Compiler IDs
 
 -   [CoffeeScript](http://coffeescript.org/) Compiler: `coffee`
--   [Snockets](http://github.com/TrevorBurnham/snockets) Compiler: `snockets`
 -   [Coco](http://satyr.github.com/coco/) Compiler: `coco`
 -   [Uglify](https://github.com/mishoo/UglifyJS) Compiler: `uglify`
 -   [Jade](http://jade-lang.com/) Compiler: `jade`
@@ -313,6 +312,8 @@ server = connect.createServer(
 -   [SassRuby](http://sass-lang.com/) Compiler: `sass_ruby` -- External compiler using a shell command to 
     the [Ruby version of Sass](http://sass-lang.com/download.html) (install via `gem install sass`).
 -   [Jison](http://zaach.github.com/jison/) Compiler: `jison`
+-   [YAML](https://github.com/visionmedia/js-yaml) Compiler: `yaml`
+-   [Snockets](http://github.com/TrevorBurnham/snockets) Compiler: `snockets`
 
 
 ## Feedback
