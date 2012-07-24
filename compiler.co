@@ -272,8 +272,11 @@ class exports.Compiler extends EventEmitter
      */
     matches: (srcDir, pathname) ->
         @log LOG.DEBUG, "matches(#srcDir, #pathname)"
-        path.join srcDir, pathname.replace(@match, @ext) if @match.exec(pathname)
-    
+        found= @match.exec(pathname)
+        return if not found
+        @info.matchIndex= found.index
+        path.join srcDir, pathname.replace(@match, @ext)
+
     srcValid: (src, cb) ->
         fs.stat src, cb
     
@@ -352,11 +355,11 @@ class exports.Compiler extends EventEmitter
             opts = @options(info_opts)
         else if @options or info_opts
             opts = {} <<< @options <<< info_opts
-        args = [text] + (if opts? then [opts] else [])
+        args = [text, ...opts]
         
         if fn = @compile
             fn = @module[fn] if typeof fn is not 'function'
-            fn.apply this, args + [cb]
+            fn.apply this, [...args, cb]
         else if fn = @compileSync
             fn = @module[fn] if typeof fn is not 'function'
             try
@@ -644,6 +647,18 @@ class exports.YamlCompiler extends Compiler
     -> super ...
 
 
+class exports.DustCompiler extends Compiler
+    id          : 'dust'
+    ext         : '.dust'
+    module      : 'dustjs-linkedin'
+    options     : {}
+    compileSync : (data) ->
+        path= @info.path
+        path= path.substring if path[0] == "/" then 1 else 0, @info.matchIndex
+        @module.compile data, path
+    -> super ...
+
+
 
 
 # Register Compilers
@@ -660,6 +675,7 @@ class exports.YamlCompiler extends Compiler
     SassRubyCompiler
     YamlCompiler
     SnocketsCompiler
+    DustCompiler
 ].map register
 
 
@@ -723,7 +739,7 @@ helpers.mkdirp = mkdirp = function mkdirp (p, mode=8r0755, cb)
     cb or= (->)
     p = expand(p)
     
-    exists <- path.exists p
+    exists <- (fs.exists || path.exists) p
     return cb null if exists
     
     ps = p.split('/')

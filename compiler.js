@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, __ref, __slice = [].slice;
+var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, DustCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, __ref, __slice = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -301,10 +301,14 @@ exports.Compiler = Compiler = (function(superclass){
    * @returns {String|String[]|false-y} Resolved source path(s) if compiler matches, false otherwise.
    */
   prototype.matches = function(srcDir, pathname){
+    var found;
     this.log(LOG.DEBUG, "matches(" + srcDir + ", " + pathname + ")");
-    if (this.match.exec(pathname)) {
-      return path.join(srcDir, pathname.replace(this.match, this.ext));
+    found = this.match.exec(pathname);
+    if (!found) {
+      return;
     }
+    this.info.matchIndex = found.index;
+    return path.join(srcDir, pathname.replace(this.match, this.ext));
   };
   prototype.srcValid = function(src, cb){
     return fs.stat(src, cb);
@@ -402,9 +406,7 @@ exports.Compiler = Compiler = (function(superclass){
     } else if (this.options || info_opts) {
       opts = __import(__import({}, this.options), info_opts);
     }
-    args = [text].concat(opts != null
-      ? [opts]
-      : []);
+    args = [text].concat(__slice.call(opts));
     if (fn = this.compile) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
@@ -791,7 +793,25 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
   }
   return YamlCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
+exports.DustCompiler = DustCompiler = (function(superclass){
+  DustCompiler.displayName = 'DustCompiler';
+  var prototype = extend$(DustCompiler, superclass).prototype, constructor = DustCompiler;
+  prototype.id = 'dust';
+  prototype.ext = '.dust';
+  prototype.module = 'dustjs-linkedin';
+  prototype.options = {};
+  prototype.compileSync = function(data){
+    var path;
+    path = this.info.path;
+    path = path.substring(path[0] == "/" ? 1 : 0, this.info.matchIndex);
+    return this.module.compile(data, path);
+  };
+  function DustCompiler(){
+    superclass.apply(this, arguments);
+  }
+  return DustCompiler;
+}(Compiler));
+[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler, DustCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
@@ -868,7 +888,7 @@ helpers.mkdirp = mkdirp = (function(){
     }
     cb || (cb = function(){});
     p = expand(p);
-    return path.exists(p, function(exists){
+    return (fs.exists || path.exists)(p, function(exists){
       var ps, _p;
       if (exists) {
         return cb(null);
