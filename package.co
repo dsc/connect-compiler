@@ -11,7 +11,7 @@ dependencies :
 #    'seq'           : '>= 0.3.5'
 devDependencies :
     'express'       : '>= 2.5.8'
-    'coco'          : '>= 0.7.0 < 0.7.6'
+    'coco'          : '>= 0.7.0'
     'coffee-script' : '>= 1.2.0'
     'jade'          : '>= 0.20.3'
     'stylus'        : '>= 0.24.0'

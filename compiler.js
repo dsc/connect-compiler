@@ -402,9 +402,7 @@ exports.Compiler = Compiler = (function(superclass){
     } else if (this.options || info_opts) {
       opts = __import(__import({}, this.options), info_opts);
     }
-    args = [text].concat(opts != null
-      ? [opts]
-      : []);
+    args = [text].concat(__slice.call(opts));
     if (fn = this.compile) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
