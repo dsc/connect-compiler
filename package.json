@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "express": ">= 2.5.8",
-    "coco": ">= 0.7.0",
+    "coco": ">= 0.7.0 < 0.7.6",
     "coffee-script": ">= 1.2.0",
     "jade": ">= 0.20.3",
     "stylus": ">= 0.24.0",
