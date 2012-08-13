@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, __ref, __slice = [].slice;
+var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, __ref, __slice = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -402,14 +402,14 @@ exports.Compiler = Compiler = (function(superclass){
     } else if (this.options || info_opts) {
       opts = __import(__import({}, this.options), info_opts);
     }
-    args = [text].concat(opts != null
+    args = [text] + (opts != null
       ? [opts]
       : []);
     if (fn = this.compile) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
       }
-      return fn.apply(this, __slice.call(args).concat([cb]));
+      return fn.apply(this, args + [cb]);
     } else if (fn = this.compileSync) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
@@ -682,6 +682,57 @@ exports.JadeBrowserPrecompiler = JadeBrowserPrecompiler = (function(superclass){
   };
   return JadeBrowserPrecompiler;
 }(Compiler));
+exports.HandlebarsCompiler = HandlebarsCompiler = (function(superclass){
+  HandlebarsCompiler.displayName = 'HandlebarsCompiler';
+  var prototype = __extend(HandlebarsCompiler, superclass).prototype, constructor = HandlebarsCompiler;
+  prototype.id = 'handlebars';
+  prototype.match = /\.html?$/i;
+  prototype.ext = '.handlebars';
+  prototype.module = 'handlebars';
+  prototype.options = function(opts){
+    opts == null && (opts = {});
+    return __import({
+      filename: this.info.src,
+      data: {}
+    }, opts);
+  };
+  function HandlebarsCompiler(){
+    superclass.apply(this, arguments);
+  }
+  prototype.compileSync = function(text, options){
+    var template;
+    options == null && (options = {});
+    template = this.module.compile(text, options);
+    return template(options.data || {});
+  };
+  return HandlebarsCompiler;
+}(Compiler));
+exports.HandlebarsBrowserPrecompiler = HandlebarsBrowserPrecompiler = (function(superclass){
+  HandlebarsBrowserPrecompiler.displayName = 'HandlebarsBrowserPrecompiler';
+  var prototype = __extend(HandlebarsBrowserPrecompiler, superclass).prototype, constructor = HandlebarsBrowserPrecompiler;
+  prototype.id = 'handlebars-browser';
+  prototype.match = /\.handlebars(?:\.mod)?(\.min)?\.js$/i;
+  prototype.ext = '.handlebars';
+  prototype.destExt = '.handlebars.js';
+  prototype.module = 'handlebars';
+  prototype.options = function(opts){
+    opts == null && (opts = {});
+    return __import({
+      filename: this.info.src
+    }, opts);
+  };
+  function HandlebarsBrowserPrecompiler(){
+    superclass.apply(this, arguments);
+  }
+  prototype.compileSync = function(text, options){
+    var template_fn, template;
+    options == null && (options = {});
+    template_fn = this.module.precompile(text, options);
+    template = String(template_fn).replace(/^function anonymous\(/, 'function (');
+    return "var template = " + template + ";\nif (typeof module != 'undefined') {\n    module.exports = exports = template;\n}";
+  };
+  return HandlebarsBrowserPrecompiler;
+}(Compiler));
 exports.StylusCompiler = StylusCompiler = (function(superclass){
   StylusCompiler.displayName = 'StylusCompiler';
   var prototype = __extend(StylusCompiler, superclass).prototype, constructor = StylusCompiler;
@@ -791,7 +842,7 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
   }
   return YamlCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
+[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;

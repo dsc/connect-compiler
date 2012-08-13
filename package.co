@@ -1,5 +1,5 @@
 name                : 'connect-compiler'
-version             : '0.1.2'
+version             : '0.1.3'
 description         : 'Dynamically recompile stale assets'
 homepage            : 'http://dsc.github.com/connect-compiler'
 keywords            : <[ connect middleware compiler development coffee-script coco jade stylus less css minify ]>
@@ -14,6 +14,7 @@ devDependencies :
     'coco'          : '>= 0.7.0'
     'coffee-script' : '>= 1.2.0'
     'jade'          : '>= 0.20.3'
+    'handlebars'    : '>= 1.0.0'
     'stylus'        : '>= 0.24.0'
     'nib'           : '>= 0.3.2'
     'less'          : '>= 1.2.2'

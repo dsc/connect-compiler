@@ -306,6 +306,7 @@ server = connect.createServer(
 -   [Coco](http://satyr.github.com/coco/) Compiler: `coco`
 -   [Uglify](https://github.com/mishoo/UglifyJS) Compiler: `uglify`
 -   [Jade](http://jade-lang.com/) Compiler: `jade`
+-   [Handlebars](http://handlebarsjs.com/) Compiler: `handlebars`
 -   [Stylus](http://learnboost.github.com/stylus/) Compiler: `stylus`
 -   [Less](http://lesscss.org/) Compiler: `less`
 -   [Sass](http://sass-lang.com/) Compiler: `sass` -- Using [sass.js](https://github.com/visionmedia/sass.js).

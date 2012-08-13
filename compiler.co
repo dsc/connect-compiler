@@ -561,6 +561,43 @@ class exports.JadeBrowserPrecompiler extends Compiler
     
 
 
+class exports.HandlebarsCompiler extends Compiler
+    id          : 'handlebars'
+    match       : /\.html?$/i
+    ext         : '.handlebars'
+    module      : 'handlebars'
+    options     : (opts={}) -> { filename:@info.src, data:{} } <<< opts
+    -> super ...
+    
+    compileSync: (text, options={}) ->
+        template = @module.compile text, options
+        template(options.data or {})
+
+
+class exports.HandlebarsBrowserPrecompiler extends Compiler
+    id          : 'handlebars-browser'
+    match       : /\.handlebars(?:\.mod)?(\.min)?\.js$/i
+    ext         : '.handlebars'
+    destExt     : '.handlebars.js'
+    module      : 'handlebars'
+    options     : (opts={}) -> { filename:@info.src } <<< opts
+    -> super ...
+    
+    compileSync: (text, options={}) ->
+        template_fn = @module.precompile text, options
+        # Convert "anonymous" named function statement to function expression
+        template = String template_fn .replace /^function anonymous\(/, 'function \('
+        
+        """
+            var template = #template;
+            if (typeof module != 'undefined') {
+                module.exports = exports = template;
+            }
+        """
+
+
+
+
 
 ### CSS Compilers
 
@@ -653,6 +690,8 @@ class exports.YamlCompiler extends Compiler
     UglifyCompiler
     JadeCompiler
     JadeBrowserPrecompiler
+    HandlebarsCompiler
+    HandlebarsBrowserPrecompiler
     StylusCompiler
     LessCompiler
     SassCompiler
