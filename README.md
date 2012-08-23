@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/dsc/connect-compiler.png)](http://travis-ci.org/dsc/connect-compiler)
 # connect-compiler
 
 [`connect`](http://senchalabs.github.com/connect/) middleware for dynamically recompiling derived files at serve-time. This module is designed for speeding up development; best-practices would have you compile all necessary files as part of your production deploy process. But you knew that, of course.
