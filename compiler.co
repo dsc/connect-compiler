@@ -352,11 +352,11 @@ class exports.Compiler extends EventEmitter
             opts = @options(info_opts)
         else if @options or info_opts
             opts = {} <<< @options <<< info_opts
-        args = [text] + (if opts? then [opts] else [])
+        args = [text].concat(if opts? then [opts] else [])
         
         if fn = @compile
             fn = @module[fn] if typeof fn is not 'function'
-            fn.apply this, args + [cb]
+            fn.apply this, args.concat [cb]
         else if fn = @compileSync
             fn = @module[fn] if typeof fn is not 'function'
             try

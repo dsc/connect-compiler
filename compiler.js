@@ -1,9 +1,9 @@
-var fs, path, parse, EventEmitter, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, __ref, __slice = [].slice;
+var fs, path, parse, EventEmitter, ref$, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, slice$ = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
 EventEmitter = require('events').EventEmitter;
-__ref = require('child_process'), exec = __ref.exec, spawn = __ref.spawn;
+ref$ = require('child_process'), exec = ref$.exec, spawn = ref$.spawn;
 Seq = require('seq');
 /**
  * Sets up an instance of the CompilerMiddleware.
@@ -15,7 +15,7 @@ Seq = require('seq');
 exports = module.exports = setup = function(settings){
   var custom, cmw;
   settings == null && (settings = {});
-  custom = __slice.call(arguments, 1);
+  custom = slice$.call(arguments, 1);
   cmw = new CompilerMiddleware(settings, custom);
   return cmw.respond;
 };
@@ -47,9 +47,9 @@ exports.DEFAULTS = DEFAULTS = {
 /** Log Levels */
 exports.LOG = LOG = {
   levelToString: function(level){
-    var name, val, __ref;
-    for (name in __ref = LOG) {
-      val = __ref[name];
+    var name, ref$, val;
+    for (name in ref$ = LOG) {
+      val = ref$[name];
       if (val === level) {
         return name;
       }
@@ -57,13 +57,13 @@ exports.LOG = LOG = {
     return String(level);
   },
   stringToLevel: function(level){
-    var name, val, __ref;
+    var name, ref$, val;
     if (typeof level !== 'string') {
       return level;
     }
     level = level.toUpperCase();
-    for (name in __ref = LOG) {
-      val = __ref[name];
+    for (name in ref$ = LOG) {
+      val = ref$[name];
       if (name === level) {
         return val;
       }
@@ -87,16 +87,16 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
    * @param {Compiler[]} [custom=[]] List of custom compilers to add.
    */
   CompilerMiddleware.displayName = 'CompilerMiddleware';
-  var prototype = __extend(CompilerMiddleware, superclass).prototype, constructor = CompilerMiddleware;
+  var prototype = extend$(CompilerMiddleware, superclass).prototype, constructor = CompilerMiddleware;
   function CompilerMiddleware(settings, custom){
-    var srcDirs, destDir, src, dest, __ref, __res;
+    var ref$, srcDirs, destDir, res$, src, dest;
     settings == null && (settings = {});
     this.custom = custom != null
       ? custom
       : [];
     superclass.call(this);
     this.respond = this.respond.bind(this);
-    this.settings = settings = __import(__import({}, DEFAULTS), settings);
+    this.settings = settings = import$(import$({}, DEFAULTS), settings);
     if (!settings.enabled || settings.enabled.length === 0) {
       throw new Error("You must supply a list of enabled compilers!");
     }
@@ -104,22 +104,22 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
       settings.enabled = [settings.enabled];
     }
     if (!settings.roots) {
-      srcDirs = (__ref = settings.src, delete settings.src, __ref) || process.cwd();
+      srcDirs = (ref$ = settings.src, delete settings.src, ref$) || process.cwd();
       if (!Array.isArray(srcDirs)) {
         srcDirs = [srcDirs];
       }
-      destDir = (__ref = settings.dest, delete settings.dest, __ref) || srcDirs[0];
+      destDir = (ref$ = settings.dest, delete settings.dest, ref$) || srcDirs[0];
       settings.roots = srcDirs.map(function(it){
         return [it, destDir];
       });
     }
     if (!Array.isArray(settings.roots)) {
-      __res = [];
-      for (src in __ref = settings.roots) {
-        dest = __ref[src];
-        __res.push([src, dest]);
+      res$ = [];
+      for (src in ref$ = settings.roots) {
+        dest = ref$[src];
+        res$.push([src, dest]);
       }
-      settings.roots = __res;
+      settings.roots = res$;
     }
     if (settings.resolve_index === true) {
       settings.resolve_index = 'index.html';
@@ -135,9 +135,9 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     }
   }
   prototype.respond = function(req, res, next){
-    var settings, request, info, success, log_prefix, that, __ref;
+    var settings, ref$, request, info, success, log_prefix, err, that;
     settings = this.settings;
-    if (settings.allowed_methods.indexOf(req.method) === -1 || ((__ref = settings.ignore) != null && __ref.test(req.url))) {
+    if (settings.allowed_methods.indexOf(req.method) === -1 || ((ref$ = settings.ignore) != null && ref$.test(req.url))) {
       return next();
     }
     request = {
@@ -154,7 +154,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     if (settings.resolve_index && /\/$/.test(request.path)) {
       request.path = path.join(request.path, settings.resolve_index);
     }
-    info = (__ref = __import(__import({}, settings), request), __ref.settings = settings, __ref.request = request, __ref.cwd = process.cwd(), __ref.matches = 0, __ref);
+    info = (ref$ = import$(import$({}, settings), request), ref$.settings = settings, ref$.request = request, ref$.cwd = process.cwd(), ref$.matches = 0, ref$);
     success = false;
     log_prefix = ">>>>    [compiler]";
     if (settings.log_level <= LOG.DEBUG) {
@@ -162,7 +162,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     }
     try {
       Seq(settings.enabled).seqEach(function(id, i){
-        var C, __ref, _info, __this = this;
+        var C, ref$, _info, this$ = this;
         C = compilers[id];
         if (!(C && (!success || settings.cascade))) {
           return this(null);
@@ -172,7 +172,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
         }
         info.compiler = C;
         info.id = id;
-        _info = __import(__import({}, info), ((__ref = info.options) != null ? __ref[id] : void 8) || {});
+        _info = import$(import$({}, info), ((ref$ = info.options) != null ? ref$[id] : void 8) || {});
         return C.run(_info, function(err, ok){
           if (!err && ok) {
             success = ok;
@@ -181,7 +181,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
           if (settings.log_level <= LOG.DEBUG) {
             console.log(log_prefix + " Completed '" + id + "'! (ok=" + ok + ", err=" + err + ") --> success=" + success);
           }
-          return __this(null);
+          return this$(null);
         });
       }).seq(function(){
         if (settings.log_level <= LOG.DEBUG) {
@@ -197,7 +197,8 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
         this.die();
         return next();
       });
-    } catch (err) {
+    } catch (e$) {
+      err = e$;
       if (settings.log_level <= LOG.ERROR) {
         console.log(log_prefix + " Caught Err!", err.stack ? '' : err);
         if (that = err.stack) {
@@ -248,7 +249,7 @@ exports.register = register = function(NewCompiler){
  */
 exports.Compiler = Compiler = (function(superclass){
   Compiler.displayName = 'Compiler';
-  var prototype = __extend(Compiler, superclass).prototype, constructor = Compiler;
+  var prototype = extend$(Compiler, superclass).prototype, constructor = Compiler;
   prototype.id = '';
   prototype.match = /(?:\.mod)?(\.min)?\.js$/i;
   prototype.ext = '';
@@ -263,10 +264,10 @@ exports.Compiler = Compiler = (function(superclass){
    * @param {Object} info Request info merged with settings. (Pointer, not copy.)
    */;
   function Compiler(info){
-    var k, v, mod, __own = {}.hasOwnProperty;
+    var k, v, mod, own$ = {}.hasOwnProperty;
     this.info = info;
     superclass.call(this);
-    for (k in this) if (__own.call(this, k)) {
+    for (k in this) if (own$.call(this, k)) {
       v = this[k];
       if (typeof v === 'function') {
         this[k] = v.bind(this);
@@ -279,7 +280,7 @@ exports.Compiler = Compiler = (function(superclass){
   }
   prototype.log = function(level){
     var msgs, that, level_name, compiler, file, len;
-    msgs = __slice.call(arguments, 1);
+    msgs = slice$.call(arguments, 1);
     if (this.info.log_level <= level) {
       level_name = (that = LOG.levelToString(level)) ? that : '';
       compiler = String(this);
@@ -290,7 +291,7 @@ exports.Compiler = Compiler = (function(superclass){
         len += 8;
         file += '\t';
       }
-      console.log.apply(console, [level_name + "\t" + compiler + "\t" + file + "\t"].concat(__slice.call(msgs)));
+      console.log.apply(console, [level_name + "\t" + compiler + "\t" + file + "\t"].concat(slice$.call(msgs)));
     }
     return true;
   };
@@ -310,12 +311,12 @@ exports.Compiler = Compiler = (function(superclass){
     return fs.stat(src, cb);
   };
   prototype.validate = function(pairs, cb){
-    var srcs, destDir, src, __ref, __this = this;
+    var ref$, srcs, destDir, src, this$ = this;
     this.log(LOG.DEBUG, "validate( [" + pairs + "], " + typeof cb + " )");
     if (!(pairs != null && pairs.length)) {
       return cb("No matching sources.");
     }
-    __ref = pairs.shift(), srcs = __ref[0], destDir = __ref[1];
+    ref$ = pairs.shift(), srcs = ref$[0], destDir = ref$[1];
     if (typeof srcs === 'string') {
       srcs = [srcs];
     }
@@ -325,7 +326,7 @@ exports.Compiler = Compiler = (function(superclass){
     }
     return this.srcValid(src, function(err, srcStat){
       if (err || !srcStat) {
-        return __this.validate(pairs, cb);
+        return this$.validate(pairs, cb);
       } else {
         return cb(null, srcStat, src, destDir);
       }
@@ -341,7 +342,7 @@ exports.Compiler = Compiler = (function(superclass){
     return path.join(destDir, this.destExt ? pathname.replace(this.match, this.destExt) : pathname);
   };
   prototype.destValid = function(dest, cb){
-    var __this = this;
+    var this$ = this;
     this.log(LOG.DEBUG, "destValid( " + dest + ", " + typeof cb + " )");
     return fs.stat(dest, function(err, destStat){
       if (err && 'ENOENT' === err.code) {
@@ -352,10 +353,10 @@ exports.Compiler = Compiler = (function(superclass){
     });
   };
   prototype.stale = function(srcStat, destStat, cb){
-    var delta, __ref;
-    delta = ((__ref = this.info.delta) != null
-      ? __ref
-      : (__ref = this.delta) != null ? __ref : 0) * 1000;
+    var ref$, delta;
+    delta = ((ref$ = this.info.delta) != null
+      ? ref$
+      : (ref$ = this.delta) != null ? ref$ : 0) * 1000;
     this.log(LOG.DEBUG, "stale( " + typeof srcStat + ", " + typeof destStat + ", " + typeof cb + " )");
     if (!srcStat) {
       return cb(new Error("Source does not exist?!"));
@@ -381,9 +382,9 @@ exports.Compiler = Compiler = (function(superclass){
   prototype.compile = null;
   prototype.compileSync = null;
   prototype.doCompile = function(text, wrapped, cb){
-    var WrappedCompiler, wc, info_opts, opts, args, fn, __ref, __this = this;
+    var ref$, WrappedCompiler, wc, info_opts, opts, args, fn, err, this$ = this;
     if (!cb) {
-      __ref = [wrapped, false], cb = __ref[0], wrapped = __ref[1];
+      ref$ = [wrapped, false], cb = ref$[0], wrapped = ref$[1];
     }
     if (this.wraps && !wrapped) {
       WrappedCompiler = compilers[this.wraps];
@@ -392,31 +393,32 @@ exports.Compiler = Compiler = (function(superclass){
         if (err) {
           return cb(err);
         } else {
-          return __this.doCompile(data, true, cb);
+          return this$.doCompile(data, true, cb);
         }
       });
     }
-    info_opts = ((__ref = this.info.options) != null ? __ref[this.id] : void 8) || {};
+    info_opts = ((ref$ = this.info.options) != null ? ref$[this.id] : void 8) || {};
     if (typeof this.options === 'function') {
       opts = this.options(info_opts);
     } else if (this.options || info_opts) {
-      opts = __import(__import({}, this.options), info_opts);
+      opts = import$(import$({}, this.options), info_opts);
     }
-    args = [text] + (opts != null
+    args = [text].concat(opts != null
       ? [opts]
       : []);
     if (fn = this.compile) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
       }
-      return fn.apply(this, args + [cb]);
+      return fn.apply(this, args.concat([cb]));
     } else if (fn = this.compileSync) {
       if (typeof fn !== 'function') {
         fn = this.module[fn];
       }
       try {
         return cb(null, fn.apply(this, args));
-      } catch (err) {
+      } catch (e$) {
+        err = e$;
         return cb(err);
       }
     } else {
@@ -445,16 +447,16 @@ exports.Compiler = Compiler = (function(superclass){
     c = info.instance = new Cls(info);
     c.log(LOG.DEBUG, 'run()');
     Seq().seq(function(){
-      var srcDir, destDir, that, pairs, __res, __i, __ref, __len, __ref1;
+      var res$, i$, ref$, len$, ref1$, srcDir, destDir, that, pairs;
       c.log(LOG.DEBUG, 'roots:', info.roots);
-      __res = [];
-      for (__i = 0, __len = (__ref = info.roots).length; __i < __len; ++__i) {
-        __ref1 = __ref[__i], srcDir = __ref1[0], destDir = __ref1[1];
+      res$ = [];
+      for (i$ = 0, len$ = (ref$ = info.roots).length; i$ < len$; ++i$) {
+        ref1$ = ref$[i$], srcDir = ref1$[0], destDir = ref1$[1];
         if (that = c.matches(srcDir, info.path)) {
-          __res.push([that, destDir]);
+          res$.push([that, destDir]);
         }
       }
-      pairs = __res;
+      pairs = res$;
       c.log(LOG.DEBUG, 'pairs:', pairs);
       return c.validate(pairs, this);
     }).seq(function(srcStat, src, destDir){
@@ -515,7 +517,7 @@ exports.Compiler = Compiler = (function(superclass){
  */
 exports.ExternalCompiler = ExternalCompiler = (function(superclass){
   ExternalCompiler.displayName = 'ExternalCompiler';
-  var prototype = __extend(ExternalCompiler, superclass).prototype, constructor = ExternalCompiler;
+  var prototype = extend$(ExternalCompiler, superclass).prototype, constructor = ExternalCompiler;
   prototype.id = 'external';
   prototype.env = null;
   prototype.cwd = null;
@@ -526,19 +528,19 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
     superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
-    var info_options, cmd, child, __ref, __this = this;
+    var ref$, info_options, cmd, child, this$ = this;
     if (!cb) {
       cb = options;
       options = {};
     }
-    info_options = ((__ref = this.info.options) != null ? __ref[this.id] : void 8) || {};
-    options = __import(__import({}, info_options), options) || {};
-    options.timeout = ((__ref = options.external_timeout) != null
-      ? __ref
-      : (__ref = options.timeout) != null
-        ? __ref
-        : (__ref = this.info.external_timeout) != null
-          ? __ref
+    info_options = ((ref$ = this.info.options) != null ? ref$[this.id] : void 8) || {};
+    options = import$(import$({}, info_options), options) || {};
+    options.timeout = ((ref$ = options.external_timeout) != null
+      ? ref$
+      : (ref$ = options.timeout) != null
+        ? ref$
+        : (ref$ = this.info.external_timeout) != null
+          ? ref$
           : this.timeout) * 1000;
     options.cwd || (options.cwd = this.cwd);
     options.env || (options.env = this.env);
@@ -554,7 +556,7 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
       }
     });
     child.stderr.on('data', function(data){
-      return __this.log(LOG.WARN, "\n" + data);
+      return this$.log(LOG.WARN, "\n" + data);
     });
     child.stdin.write(text);
     return child.stdin.end();
@@ -563,7 +565,7 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
 }(Compiler));
 exports.CoffeeScriptCompiler = CoffeeScriptCompiler = (function(superclass){
   CoffeeScriptCompiler.displayName = 'CoffeeScriptCompiler';
-  var prototype = __extend(CoffeeScriptCompiler, superclass).prototype, constructor = CoffeeScriptCompiler;
+  var prototype = extend$(CoffeeScriptCompiler, superclass).prototype, constructor = CoffeeScriptCompiler;
   prototype.id = 'coffee';
   prototype.ext = '.coffee';
   prototype.destExt = '.js';
@@ -579,7 +581,7 @@ exports.CoffeeScriptCompiler = CoffeeScriptCompiler = (function(superclass){
 }(Compiler));
 exports.SnocketsCompiler = SnocketsCompiler = (function(superclass){
   SnocketsCompiler.displayName = 'SnocketsCompiler';
-  var prototype = __extend(SnocketsCompiler, superclass).prototype, constructor = SnocketsCompiler;
+  var prototype = extend$(SnocketsCompiler, superclass).prototype, constructor = SnocketsCompiler;
   prototype.id = 'snockets';
   prototype.ext = '.coffee';
   prototype.destExt = '.js';
@@ -600,7 +602,7 @@ exports.SnocketsCompiler = SnocketsCompiler = (function(superclass){
 }(Compiler));
 exports.CocoCompiler = CocoCompiler = (function(superclass){
   CocoCompiler.displayName = 'CocoCompiler';
-  var prototype = __extend(CocoCompiler, superclass).prototype, constructor = CocoCompiler;
+  var prototype = extend$(CocoCompiler, superclass).prototype, constructor = CocoCompiler;
   prototype.id = 'coco';
   prototype.ext = '.co';
   prototype.destExt = '.js';
@@ -616,7 +618,7 @@ exports.CocoCompiler = CocoCompiler = (function(superclass){
 }(Compiler));
 exports.UglifyCompiler = UglifyCompiler = (function(superclass){
   UglifyCompiler.displayName = 'UglifyCompiler';
-  var prototype = __extend(UglifyCompiler, superclass).prototype, constructor = UglifyCompiler;
+  var prototype = extend$(UglifyCompiler, superclass).prototype, constructor = UglifyCompiler;
   prototype.id = 'uglify';
   prototype.match = /\.min(\.mod)?\.js$/i;
   prototype.ext = '$1.js';
@@ -635,14 +637,14 @@ exports.UglifyCompiler = UglifyCompiler = (function(superclass){
 }(Compiler));
 exports.JadeCompiler = JadeCompiler = (function(superclass){
   JadeCompiler.displayName = 'JadeCompiler';
-  var prototype = __extend(JadeCompiler, superclass).prototype, constructor = JadeCompiler;
+  var prototype = extend$(JadeCompiler, superclass).prototype, constructor = JadeCompiler;
   prototype.id = 'jade';
   prototype.match = /\.html?$/i;
   prototype.ext = '.jade';
   prototype.module = 'jade';
   prototype.options = function(opts){
     opts == null && (opts = {});
-    return __import({
+    return import$({
       pretty: true,
       filename: this.info.src
     }, opts);
@@ -655,7 +657,7 @@ exports.JadeCompiler = JadeCompiler = (function(superclass){
 }(Compiler));
 exports.JadeBrowserPrecompiler = JadeBrowserPrecompiler = (function(superclass){
   JadeBrowserPrecompiler.displayName = 'JadeBrowserPrecompiler';
-  var prototype = __extend(JadeBrowserPrecompiler, superclass).prototype, constructor = JadeBrowserPrecompiler;
+  var prototype = extend$(JadeBrowserPrecompiler, superclass).prototype, constructor = JadeBrowserPrecompiler;
   prototype.id = 'jade-browser';
   prototype.match = /\.jade(?:\.mod)?(\.min)?\.js$/i;
   prototype.ext = '.jade';
@@ -663,7 +665,7 @@ exports.JadeBrowserPrecompiler = JadeBrowserPrecompiler = (function(superclass){
   prototype.module = 'jade';
   prototype.options = function(opts){
     opts == null && (opts = {});
-    return __import({
+    return import$({
       pretty: true,
       client: true,
       compileDebug: false,
@@ -684,14 +686,14 @@ exports.JadeBrowserPrecompiler = JadeBrowserPrecompiler = (function(superclass){
 }(Compiler));
 exports.HandlebarsCompiler = HandlebarsCompiler = (function(superclass){
   HandlebarsCompiler.displayName = 'HandlebarsCompiler';
-  var prototype = __extend(HandlebarsCompiler, superclass).prototype, constructor = HandlebarsCompiler;
+  var prototype = extend$(HandlebarsCompiler, superclass).prototype, constructor = HandlebarsCompiler;
   prototype.id = 'handlebars';
   prototype.match = /\.html?$/i;
   prototype.ext = '.handlebars';
   prototype.module = 'handlebars';
   prototype.options = function(opts){
     opts == null && (opts = {});
-    return __import({
+    return import$({
       filename: this.info.src,
       data: {}
     }, opts);
@@ -709,7 +711,7 @@ exports.HandlebarsCompiler = HandlebarsCompiler = (function(superclass){
 }(Compiler));
 exports.HandlebarsBrowserPrecompiler = HandlebarsBrowserPrecompiler = (function(superclass){
   HandlebarsBrowserPrecompiler.displayName = 'HandlebarsBrowserPrecompiler';
-  var prototype = __extend(HandlebarsBrowserPrecompiler, superclass).prototype, constructor = HandlebarsBrowserPrecompiler;
+  var prototype = extend$(HandlebarsBrowserPrecompiler, superclass).prototype, constructor = HandlebarsBrowserPrecompiler;
   prototype.id = 'handlebars-browser';
   prototype.match = /\.handlebars(?:\.mod)?(\.min)?\.js$/i;
   prototype.ext = '.handlebars';
@@ -717,7 +719,7 @@ exports.HandlebarsBrowserPrecompiler = HandlebarsBrowserPrecompiler = (function(
   prototype.module = 'handlebars';
   prototype.options = function(opts){
     opts == null && (opts = {});
-    return __import({
+    return import$({
       filename: this.info.src
     }, opts);
   };
@@ -735,7 +737,7 @@ exports.HandlebarsBrowserPrecompiler = HandlebarsBrowserPrecompiler = (function(
 }(Compiler));
 exports.StylusCompiler = StylusCompiler = (function(superclass){
   StylusCompiler.displayName = 'StylusCompiler';
-  var prototype = __extend(StylusCompiler, superclass).prototype, constructor = StylusCompiler;
+  var prototype = extend$(StylusCompiler, superclass).prototype, constructor = StylusCompiler;
   prototype.id = 'stylus';
   prototype.match = /\.css$/i;
   prototype.ext = '.styl';
@@ -744,10 +746,10 @@ exports.StylusCompiler = StylusCompiler = (function(superclass){
     superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
-    var stylus, k, v, __ref;
+    var ref$, stylus, k, v;
     options == null && (options = {});
     if (!cb) {
-      __ref = [options, {}], cb = __ref[0], options = __ref[1];
+      ref$ = [options, {}], cb = ref$[0], options = ref$[1];
     }
     stylus = this.module(text);
     options.filename = this.info.src;
@@ -770,7 +772,7 @@ exports.StylusCompiler = StylusCompiler = (function(superclass){
 }(Compiler));
 exports.LessCompiler = LessCompiler = (function(superclass){
   LessCompiler.displayName = 'LessCompiler';
-  var prototype = __extend(LessCompiler, superclass).prototype, constructor = LessCompiler;
+  var prototype = extend$(LessCompiler, superclass).prototype, constructor = LessCompiler;
   prototype.id = 'less';
   prototype.match = /\.css$/i;
   prototype.ext = '.less';
@@ -783,7 +785,7 @@ exports.LessCompiler = LessCompiler = (function(superclass){
 }(Compiler));
 exports.SassCompiler = SassCompiler = (function(superclass){
   SassCompiler.displayName = 'SassCompiler';
-  var prototype = __extend(SassCompiler, superclass).prototype, constructor = SassCompiler;
+  var prototype = extend$(SassCompiler, superclass).prototype, constructor = SassCompiler;
   prototype.id = 'sass';
   prototype.match = /\.css$/i;
   prototype.ext = '.sass';
@@ -796,7 +798,7 @@ exports.SassCompiler = SassCompiler = (function(superclass){
 }(Compiler));
 exports.SassRubyCompiler = SassRubyCompiler = (function(superclass){
   SassRubyCompiler.displayName = 'SassRubyCompiler';
-  var prototype = __extend(SassRubyCompiler, superclass).prototype, constructor = SassRubyCompiler;
+  var prototype = extend$(SassRubyCompiler, superclass).prototype, constructor = SassRubyCompiler;
   prototype.id = 'sass_ruby';
   prototype.match = /\.css$/i;
   prototype.ext = '.sass';
@@ -813,7 +815,7 @@ exports.SassRubyCompiler = SassRubyCompiler = (function(superclass){
 }(ExternalCompiler));
 exports.JisonCompiler = JisonCompiler = (function(superclass){
   JisonCompiler.displayName = 'JisonCompiler';
-  var prototype = __extend(JisonCompiler, superclass).prototype, constructor = JisonCompiler;
+  var prototype = extend$(JisonCompiler, superclass).prototype, constructor = JisonCompiler;
   prototype.id = 'jison';
   prototype.ext = '.jison';
   prototype.module = 'jison';
@@ -829,7 +831,7 @@ exports.JisonCompiler = JisonCompiler = (function(superclass){
 }(Compiler));
 exports.YamlCompiler = YamlCompiler = (function(superclass){
   YamlCompiler.displayName = 'YamlCompiler';
-  var prototype = __extend(YamlCompiler, superclass).prototype, constructor = YamlCompiler;
+  var prototype = extend$(YamlCompiler, superclass).prototype, constructor = YamlCompiler;
   prototype.id = 'yaml';
   prototype.match = /\.json$/i;
   prototype.ext = '.yaml';
@@ -846,7 +848,7 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
-  parts = __slice.call(arguments);
+  parts = slice$.call(arguments);
   p = path.normalize(path.join.apply(path, parts));
   if (p.indexOf('~') === 0) {
     home = process.env.HOME || process.env.HOMEPATH;
@@ -863,29 +865,29 @@ helpers.extrema = extrema = function(its){
     return [its[0], its[0]];
   }
   by_length = (function(){
-    var __i, __ref, __len, __results = [];
-    for (__i = 0, __len = (__ref = its).length; __i < __len; ++__i) {
-      it = __ref[__i];
-      __results.push([it.length, it]);
+    var i$, ref$, len$, results$ = [];
+    for (i$ = 0, len$ = (ref$ = its).length; i$ < len$; ++i$) {
+      it = ref$[i$];
+      results$.push([it.length, it]);
     }
-    return __results;
+    return results$;
   }()).sort();
   return [by_length[0][1], by_length[by_length.length - 1][1]];
 };
 helpers.commonPrefix = commonPrefix = function(){
-  var lists, shortest, longest, i, c, __ref, __len;
-  lists = __slice.call(arguments);
+  var lists, ref$, shortest, longest, i, len$, c;
+  lists = slice$.call(arguments);
   if (!(lists != null && lists.length)) {
     return '';
   }
   if (lists.length < 2) {
     return lists[0];
   }
-  __ref = extrema(lists), shortest = __ref[0], longest = __ref[1];
+  ref$ = extrema(lists), shortest = ref$[0], longest = ref$[1];
   if (shortest === longest) {
     return longest;
   }
-  for (i = 0, __len = shortest.length; i < __len; ++i) {
+  for (i = 0, len$ = shortest.length; i < len$; ++i) {
     c = shortest[i];
     if (c != longest[i]) {
       return shortest.slice(0, i);
@@ -894,15 +896,15 @@ helpers.commonPrefix = commonPrefix = function(){
   return shortest;
 };
 helpers.commonPath = commonPath = function(){
-  var paths, shortest, longest, prefix, components, __ref;
-  paths = __slice.call(arguments);
+  var paths, ref$, shortest, longest, prefix, components;
+  paths = slice$.call(arguments);
   if (!(paths != null && paths.length)) {
     return '';
   }
   if (paths.length < 2) {
     return paths[0];
   }
-  __ref = extrema(paths), shortest = __ref[0], longest = __ref[1];
+  ref$ = extrema(paths), shortest = ref$[0], longest = ref$[1];
   prefix = commonPrefix.apply(null, paths);
   if (prefix.charAt(prefix.length - 1) === '/') {
     prefix = prefix.slice(0, -1);
@@ -912,10 +914,10 @@ helpers.commonPath = commonPath = function(){
 };
 helpers.mkdirp = mkdirp = (function(){
   function mkdirp(p, mode, cb){
-    var __ref;
+    var ref$;
     mode == null && (mode = 493);
     if (typeof mode === 'function') {
-      __ref = [mode, 493], cb = __ref[0], mode = __ref[1];
+      ref$ = [mode, 493], cb = ref$[0], mode = ref$[1];
     }
     cb || (cb = function(){});
     p = expand(p);
@@ -945,13 +947,13 @@ helpers.mkdirp = mkdirp = (function(){
   }
   return mkdirp;
 }());
-function __extend(sub, sup){
+function extend$(sub, sup){
   function fun(){} fun.prototype = (sub.superclass = sup).prototype;
   (sub.prototype = new fun).constructor = sub;
   if (typeof sup.extended == 'function') sup.extended(sub);
   return sub;
 }
-function __import(obj, src){
+function import$(obj, src){
   var own = {}.hasOwnProperty;
   for (var key in src) if (own.call(src, key)) obj[key] = src[key];
   return obj;
