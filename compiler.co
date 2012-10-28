@@ -505,6 +505,13 @@ class exports.CocoCompiler extends Compiler
     compileSync : 'compile'
     -> super ...
 
+class exports.PogoCompiler extends Compiler
+    id          : 'pogo'
+    ext         : '.pogo'
+    destExt     : '.js'
+    module      : 'pogo'
+    compileSync : 'compile'
+    -> super ...
 
 class exports.UglifyCompiler extends Compiler
     id          : 'uglify'
@@ -687,6 +694,7 @@ class exports.YamlCompiler extends Compiler
 
 [   CoffeeScriptCompiler
     CocoCompiler
+    PogoCompiler
     UglifyCompiler
     JadeCompiler
     JadeBrowserPrecompiler

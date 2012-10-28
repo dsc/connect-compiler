@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, ref$, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, slice$ = [].slice;
+var fs, path, parse, EventEmitter, ref$, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, PogoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, slice$ = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -616,6 +616,19 @@ exports.CocoCompiler = CocoCompiler = (function(superclass){
   }
   return CocoCompiler;
 }(Compiler));
+exports.PogoCompiler = PogoCompiler = (function(superclass){
+  PogoCompiler.displayName = 'PogoCompiler';
+  var prototype = extend$(PogoCompiler, superclass).prototype, constructor = PogoCompiler;
+  prototype.id = 'pogo';
+  prototype.ext = '.pogo';
+  prototype.destExt = '.js';
+  prototype.module = 'pogo';
+  prototype.compileSync = 'compile';
+  function PogoCompiler(){
+    superclass.apply(this, arguments);
+  }
+  return PogoCompiler;
+}(Compiler));
 exports.UglifyCompiler = UglifyCompiler = (function(superclass){
   UglifyCompiler.displayName = 'UglifyCompiler';
   var prototype = extend$(UglifyCompiler, superclass).prototype, constructor = UglifyCompiler;
@@ -844,7 +857,7 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
   }
   return YamlCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
+[CoffeeScriptCompiler, CocoCompiler, PogoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
