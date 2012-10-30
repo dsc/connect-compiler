@@ -315,6 +315,7 @@ server = connect.createServer(
 -   [Jison](http://zaach.github.com/jison/) Compiler: `jison`
 -   [YAML](https://github.com/visionmedia/js-yaml) Compiler: `yaml`
 -   [Snockets](http://github.com/TrevorBurnham/snockets) Compiler: `snockets`
+-   [PogoScript](http://pogoscript.org/) Compiler: `pogo`
 
 
 ## Feedback
