@@ -43,7 +43,7 @@ exports.DEFAULTS = DEFAULTS =
     cascade          : false                    # invoke all compilers that match? otherwise, only first.
     ignore           : /\.(jpe?g|gif|png)$/i    # Requests matching this pattern are ignored, and no compiler matching occurs.
     resolve_index    : false                    # if true-y, resolve directories to this filename: false | true => 'index.html' | str
-    allowed_methods  : [ 'GET' ]                # HTTP methods compiler should process
+    allowed_methods  : [ 'GET', 'HEAD' ]        # HTTP methods compiler should process
     
     # TODO (maybe)
     # on               : null      # event handlers to add: { event : handler, ... }

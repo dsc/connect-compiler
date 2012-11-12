@@ -39,7 +39,7 @@ exports.DEFAULTS = DEFAULTS = {
   cascade: false,
   ignore: /\.(jpe?g|gif|png)$/i,
   resolve_index: false,
-  allowed_methods: ['GET'],
+  allowed_methods: ['GET', 'HEAD'],
   options: {
     all: {}
   }
