@@ -369,14 +369,20 @@ class exports.Compiler extends EventEmitter
     
     write: (dest, data, cb) ->
         if @info.log_level <= LOG.INFO
-            prefix = commonPath @info.src, dest
-            len    = prefix.length
-            if prefix.indexOf @info.cwd is 0
-                prefix .= slice @info.cwd.length+1
-            if len
-                @log LOG.INFO, "writing #prefix{ #{@info.src.slice len} --> #{dest.slice len} }"
+            _dest = dest
+            {src, cwd} = @info
+            cwd += '/' unless cwd[cwd.length-1] is '/'
+            if src.indexOf(cwd) is 0
+                src .= slice cwd.length
+            if _dest.indexOf(cwd) is 0
+                _dest .= slice cwd.length
+            prefix = commonPath src, _dest
+            if prefix[0] is '/'
+                prefix .= slice 1
+            if len = prefix.length
+                @log LOG.INFO, "writing #prefix{ #{src.slice len} --> #{_dest.slice len} }"
             else
-                @log LOG.INFO, "writing #{@info.src} --> #dest"
+                @log LOG.INFO, "writing #src --> #_dest"
         fs.writeFile dest, data, 'utf8', cb
     
     
@@ -736,6 +742,8 @@ helpers.commonPrefix = commonPrefix = (...lists) ->
     
     if shortest is longest
         return longest
+    if shortest.length is 0 or longest.length is 0
+        return ''
     
     for c, i of shortest
         return shortest.slice(0, i) if c != longest[i]
@@ -750,11 +758,12 @@ helpers.commonPath = commonPath = (...paths) ->
     prefix = commonPrefix(...paths)
     
     # ...now ensure it's a full component
-    if prefix.charAt(prefix.length-1) is '/'
-        prefix = prefix.slice 0, -1
+    # while prefix.charAt(prefix.length-1) is '/'
+    #     prefix = prefix.slice 0, -1
     
     components = commonPrefix prefix.split('/'), longest.split('/')
-    return components.join('/')+'/'
+    components.push('') if prefix.length > components.length
+    return components.join('/')
 
 
 helpers.mkdirp = mkdirp = function mkdirp (p, mode=8r0755, cb)

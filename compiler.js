@@ -426,17 +426,27 @@ exports.Compiler = Compiler = (function(superclass){
     }
   };
   prototype.write = function(dest, data, cb){
-    var prefix, len;
+    var _dest, ref$, src, cwd, prefix, len;
     if (this.info.log_level <= LOG.INFO) {
-      prefix = commonPath(this.info.src, dest);
-      len = prefix.length;
-      if (prefix.indexOf(this.info.cwd === 0)) {
-        prefix = prefix.slice(this.info.cwd.length + 1);
+      _dest = dest;
+      ref$ = this.info, src = ref$.src, cwd = ref$.cwd;
+      if (cwd[cwd.length - 1] !== '/') {
+        cwd += '/';
       }
-      if (len) {
-        this.log(LOG.INFO, "writing " + prefix + "{ " + this.info.src.slice(len) + " --> " + dest.slice(len) + " }");
+      if (src.indexOf(cwd) === 0) {
+        src = src.slice(cwd.length);
+      }
+      if (_dest.indexOf(cwd) === 0) {
+        _dest = _dest.slice(cwd.length);
+      }
+      prefix = commonPath(src, _dest);
+      if (prefix[0] === '/') {
+        prefix = prefix.slice(1);
+      }
+      if (len = prefix.length) {
+        this.log(LOG.INFO, "writing " + prefix + "{ " + src.slice(len) + " --> " + _dest.slice(len) + " }");
       } else {
-        this.log(LOG.INFO, "writing " + this.info.src + " --> " + dest);
+        this.log(LOG.INFO, "writing " + src + " --> " + _dest);
       }
     }
     return fs.writeFile(dest, data, 'utf8', cb);
@@ -887,6 +897,9 @@ helpers.commonPrefix = commonPrefix = function(){
   if (shortest === longest) {
     return longest;
   }
+  if (shortest.length === 0 || longest.length === 0) {
+    return '';
+  }
   for (i = 0, len$ = shortest.length; i < len$; ++i) {
     c = shortest[i];
     if (c != longest[i]) {
@@ -906,11 +919,11 @@ helpers.commonPath = commonPath = function(){
   }
   ref$ = extrema(paths), shortest = ref$[0], longest = ref$[1];
   prefix = commonPrefix.apply(null, paths);
-  if (prefix.charAt(prefix.length - 1) === '/') {
-    prefix = prefix.slice(0, -1);
-  }
   components = commonPrefix(prefix.split('/'), longest.split('/'));
-  return components.join('/') + '/';
+  if (prefix.length > components.length) {
+    components.push('');
+  }
+  return components.join('/');
 };
 helpers.mkdirp = mkdirp = (function(){
   function mkdirp(p, mode, cb){
