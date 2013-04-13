@@ -1,12 +1,14 @@
-path     = require 'path'
+{ dirname, basename,
+} = path = require 'path'
 express  = require 'express'
 
-
 PORT        = 8080
-PROJECT_DIR = path.dirname __dirname
-TESTS       = __dirname
+TESTS       = dirname __dirname
+PROJECT_DIR = dirname TESTS
+VAR         = PROJECT_DIR+'/var'
 WWW         = TESTS+'/browser'
-VAR         = TESTS+'/var'
+SRC         = WWW+'/src'
+
 
 compiler = require PROJECT_DIR+'/compiler'
 
@@ -14,7 +16,12 @@ compiler = require PROJECT_DIR+'/compiler'
 app = express.createServer()
 app.listen PORT
 
-console.log "Test Server started on port #PORT..."
+console.log ">> Connect Compiler Test Server <<"
+console.log '    PORT:          ', PORT
+console.log '    PROJECT_DIR:   ', PROJECT_DIR
+console.log '    TESTS:         ', TESTS
+console.log '    WWW:           ', WWW
+console.log '    VAR:           ', VAR
 
 app.configure ->
     console.log 'server.configure()'
@@ -24,19 +31,27 @@ app.configure ->
     app.use express.methodOverride()
     
     app.use compiler do
-        enabled : <[ coco coffee jade stylus sass jison ]>
+        enabled : <[ livescript coco coffee  ]>
         src     : WWW
         dest    : VAR
-        options :
-            stylus    : nib:true, compress:true
+        # options :
+        #     stylus    : nib:true, compress:true
         log_level : 'DEBUG'
     
+    # app.use compiler do
+    #     enabled : <[ jade stylus sass jison ]>
+    #     src     : WWW
+    #     dest    : VAR
+    #     options :
+    #         stylus    : nib:true, compress:true
+    #     log_level : 'DEBUG'
+    
     # compress anything that desires compression (*.min.js)
-    app.use compiler do
-        enabled : <[ uglify ]>
-        src     : [ WWW, VAR ]
-        dest    : VAR
-        log_level : 'DEBUG'
+    # app.use compiler do
+    #     enabled : <[ uglify ]>
+    #     src     : [ WWW, VAR ]
+    #     dest    : VAR
+    #     log_level : 'DEBUG'
     
     app.use express.static WWW
     app.use express.static VAR

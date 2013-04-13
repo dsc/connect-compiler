@@ -1,0 +1,6 @@
+export pythagorases =
+  for a from 9 to 1 by -1
+    for b from a til 99
+      h = (a*a + b*b) ** 0.5
+      [a, b, h] unless h % 1
+
