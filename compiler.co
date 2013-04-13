@@ -703,6 +703,7 @@ class exports.YamlCompiler extends Compiler
 
 [   CoffeeScriptCompiler
     CocoCompiler
+    LiveScriptCompiler
     UglifyCompiler
     JadeCompiler
     JadeBrowserPrecompiler

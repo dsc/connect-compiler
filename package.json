@@ -25,6 +25,7 @@
     "express": ">= 2.5.8",
     "coco": ">= 0.7.0",
     "coffee-script": ">= 1.2.0",
+    "LiveScript": ">= 1.1.0",
     "jade": ">= 0.20.3",
     "handlebars": ">= 1.0.0",
     "stylus": ">= 0.24.0",

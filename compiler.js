@@ -1,4 +1,4 @@
-var fs, path, parse, EventEmitter, ref$, exec, spawn, Seq, setup, exports, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, slice$ = [].slice;
+var fs, path, parse, EventEmitter, ref$, exec, spawn, Seq, exports, setup, compilers, DEFAULTS, LOG, CompilerMiddleware, register, Compiler, ExternalCompiler, CoffeeScriptCompiler, SnocketsCompiler, CocoCompiler, LiveScriptCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, SassRubyCompiler, JisonCompiler, YamlCompiler, helpers, expand, extrema, commonPrefix, commonPath, mkdirp, slice$ = [].slice;
 fs = require('fs');
 path = require('path');
 parse = require('url').parse;
@@ -89,7 +89,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
   CompilerMiddleware.displayName = 'CompilerMiddleware';
   var prototype = extend$(CompilerMiddleware, superclass).prototype, constructor = CompilerMiddleware;
   function CompilerMiddleware(settings, custom){
-    var ref$, srcDirs, destDir, res$, src, dest;
+    var srcDirs, ref$, destDir, res$, src, dest;
     settings == null && (settings = {});
     this.custom = custom != null
       ? custom
@@ -162,7 +162,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     }
     try {
       Seq(settings.enabled).seqEach(function(id, i){
-        var C, ref$, _info, this$ = this;
+        var C, _info, ref$, this$ = this;
         C = compilers[id];
         if (!(C && (!success || settings.cascade))) {
           return this(null);
@@ -279,7 +279,7 @@ exports.Compiler = Compiler = (function(superclass){
     }
   }
   prototype.log = function(level){
-    var msgs, that, level_name, compiler, file, len;
+    var msgs, level_name, that, compiler, file, len;
     msgs = slice$.call(arguments, 1);
     if (this.info.log_level <= level) {
       level_name = (that = LOG.levelToString(level)) ? that : '';
@@ -353,7 +353,7 @@ exports.Compiler = Compiler = (function(superclass){
     });
   };
   prototype.stale = function(srcStat, destStat, cb){
-    var ref$, delta;
+    var delta, ref$;
     delta = ((ref$ = this.info.delta) != null
       ? ref$
       : (ref$ = this.delta) != null ? ref$ : 0) * 1000;
@@ -457,7 +457,7 @@ exports.Compiler = Compiler = (function(superclass){
     c = info.instance = new Cls(info);
     c.log(LOG.DEBUG, 'run()');
     Seq().seq(function(){
-      var res$, i$, ref$, len$, ref1$, srcDir, destDir, that, pairs;
+      var pairs, res$, i$, ref$, len$, ref1$, srcDir, destDir, that;
       c.log(LOG.DEBUG, 'roots:', info.roots);
       res$ = [];
       for (i$ = 0, len$ = (ref$ = info.roots).length; i$ < len$; ++i$) {
@@ -538,7 +538,7 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
     superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
-    var ref$, info_options, cmd, child, this$ = this;
+    var info_options, ref$, cmd, child, this$ = this;
     if (!cb) {
       cb = options;
       options = {};
@@ -560,7 +560,7 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
     this.log(LOG.DEBUG, cmd + "");
     child = exec(cmd, options, function(err, stdout, stderr){
       if (err) {
-        return cb(new Error(this + " error:\n" + err));
+        return cb(new Error(this$ + " error:\n" + err));
       } else {
         return cb(null, String(stdout));
       }
@@ -625,6 +625,22 @@ exports.CocoCompiler = CocoCompiler = (function(superclass){
     superclass.apply(this, arguments);
   }
   return CocoCompiler;
+}(Compiler));
+exports.LiveScriptCompiler = LiveScriptCompiler = (function(superclass){
+  LiveScriptCompiler.displayName = 'LiveScriptCompiler';
+  var prototype = extend$(LiveScriptCompiler, superclass).prototype, constructor = LiveScriptCompiler;
+  prototype.id = 'livescript';
+  prototype.ext = '.ls';
+  prototype.destExt = '.js';
+  prototype.module = 'LiveScript';
+  prototype.options = {
+    bare: true
+  };
+  prototype.compileSync = 'compile';
+  function LiveScriptCompiler(){
+    superclass.apply(this, arguments);
+  }
+  return LiveScriptCompiler;
 }(Compiler));
 exports.UglifyCompiler = UglifyCompiler = (function(superclass){
   UglifyCompiler.displayName = 'UglifyCompiler';
@@ -854,7 +870,7 @@ exports.YamlCompiler = YamlCompiler = (function(superclass){
   }
   return YamlCompiler;
 }(Compiler));
-[CoffeeScriptCompiler, CocoCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
+[CoffeeScriptCompiler, CocoCompiler, LiveScriptCompiler, UglifyCompiler, JadeCompiler, JadeBrowserPrecompiler, HandlebarsCompiler, HandlebarsBrowserPrecompiler, StylusCompiler, LessCompiler, SassCompiler, JisonCompiler, SassRubyCompiler, YamlCompiler, SnocketsCompiler].map(register);
 helpers = exports.helpers = {};
 helpers.expand = expand = function(){
   var parts, p, home;
@@ -867,7 +883,7 @@ helpers.expand = expand = function(){
   return path.resolve(p);
 };
 helpers.extrema = extrema = function(its){
-  var it, by_length;
+  var by_length, it;
   if (!(its != null && its.length)) {
     return [];
   }

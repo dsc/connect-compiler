@@ -1,11 +1,25 @@
 .DS_Store
 Icon?
+*~
+*.sw?
 
+*.pid
+*.db
+*.sqlite
+
+npm-debug.log
 node_modules/
 node_modules/*
-npm-debug.log
 *.sass-cache
-lib-cov
+lib-cov/
 test/*.log
 test/fixtures/*.json
 test/fixtures/logs/*.log
+.cache/
+.tmp/
+
+build
+dist
+var
+log
+tmp
