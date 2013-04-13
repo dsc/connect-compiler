@@ -304,6 +304,7 @@ server = connect.createServer(
 
 -   [CoffeeScript](http://coffeescript.org/) Compiler: `coffee`
 -   [Coco](http://satyr.github.com/coco/) Compiler: `coco`
+-   [LiveScript](http://http://livescript.net) Compiler: `livescript`
 -   [Uglify](https://github.com/mishoo/UglifyJS) Compiler: `uglify`
 -   [Jade](http://jade-lang.com/) Compiler: `jade`
 -   [Handlebars](http://handlebarsjs.com/) Compiler: `handlebars`
