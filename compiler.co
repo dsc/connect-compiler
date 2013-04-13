@@ -512,6 +512,16 @@ class exports.CocoCompiler extends Compiler
     -> super ...
 
 
+class exports.LiveScriptCompiler extends Compiler
+    id          : 'livescript'
+    ext         : '.ls'
+    destExt     : '.js'
+    module      : 'LiveScript'
+    options     : { bare:true }
+    compileSync : 'compile'
+    -> super ...
+
+
 class exports.UglifyCompiler extends Compiler
     id          : 'uglify'
     match       : /\.min(\.mod)?\.js$/i,
