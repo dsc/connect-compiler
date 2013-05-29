@@ -284,7 +284,7 @@ key.
 For example, to disable the `bare` option for the CoffeeScript compiler, you'd do something like:
 
 ````js
-server = connect.createServer(
+var server = connect.createServer(
     compiler({
         enabled : [ 'coffee' ],
         src     : 'src',
@@ -297,8 +297,9 @@ server = connect.createServer(
     }),
     connect.static(__dirname + '/public'),
     connect.static(__dirname + '/var')
-)
+);
 ````
+
 
 ### Compiler IDs
 
