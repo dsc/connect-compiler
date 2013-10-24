@@ -950,7 +950,7 @@ helpers.mkdirp = mkdirp = (function(){
     }
     cb || (cb = function(){});
     p = expand(p);
-    return path.exists(p, function(exists){
+    return fs.exists(p, function(exists){
       var ps, _p;
       if (exists) {
         return cb(null);
