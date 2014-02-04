@@ -951,13 +951,10 @@ helpers.mkdirp = mkdirp = (function(){
     cb || (cb = function(){});
     p = expand(p);
     return path.exists(p, function(exists){
-      var ps, _p;
       if (exists) {
         return cb(null);
       }
-      ps = p.split('/');
-      _p = ps.slice(0, -1).join('/');
-      return mkdirp(_p, mode, function(err){
+      return mkdirp(path.dirname(p), mode, function(err){
         if ((err != null ? err.code : void 8) === 'EEXIST') {
           return cb(null);
         }

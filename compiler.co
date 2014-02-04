@@ -785,10 +785,7 @@ helpers.mkdirp = mkdirp = function mkdirp (p, mode=8r0755, cb)
     exists <- path.exists p
     return cb null if exists
     
-    ps = p.split('/')
-    _p = ps.slice(0, -1).join('/')
-    
-    err <- mkdirp _p, mode
+    err <- mkdirp (path.dirname p), mode
     return cb null if err?.code is 'EEXIST'
     return cb err  if err
     
