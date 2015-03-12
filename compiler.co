@@ -782,7 +782,7 @@ helpers.mkdirp = mkdirp = function mkdirp (p, mode=8r0755, cb)
     cb or= (->)
     p = expand(p)
     
-    exists <- path.exists p
+    exists <- fs.exists p
     return cb null if exists
     
     ps = p.split('/')
