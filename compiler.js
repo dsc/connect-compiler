@@ -89,7 +89,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
   CompilerMiddleware.displayName = 'CompilerMiddleware';
   var prototype = extend$(CompilerMiddleware, superclass).prototype, constructor = CompilerMiddleware;
   function CompilerMiddleware(settings, custom){
-    var srcDirs, ref$, destDir, res$, src, dest;
+    var srcDirs, ref$, destDir, ref1$, res$, src, ref2$, dest;
     settings == null && (settings = {});
     this.custom = custom != null
       ? custom
@@ -108,15 +108,15 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
       if (!Array.isArray(srcDirs)) {
         srcDirs = [srcDirs];
       }
-      destDir = (ref$ = settings.dest, delete settings.dest, ref$) || srcDirs[0];
+      destDir = (ref1$ = settings.dest, delete settings.dest, ref1$) || srcDirs[0];
       settings.roots = srcDirs.map(function(it){
         return [it, destDir];
       });
     }
     if (!Array.isArray(settings.roots)) {
       res$ = [];
-      for (src in ref$ = settings.roots) {
-        dest = ref$[src];
+      for (src in ref2$ = settings.roots) {
+        dest = ref2$[src];
         res$.push([src, dest]);
       }
       settings.roots = res$;
@@ -135,7 +135,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     }
   }
   prototype.respond = function(req, res, next){
-    var settings, ref$, request, info, success, log_prefix, err, that;
+    var settings, ref$, request, info, ref1$, success, log_prefix, err, that;
     settings = this.settings;
     if (settings.allowed_methods.indexOf(req.method) === -1 || ((ref$ = settings.ignore) != null && ref$.test(req.url))) {
       return next();
@@ -154,7 +154,7 @@ exports.CompilerMiddleware = CompilerMiddleware = (function(superclass){
     if (settings.resolve_index && /\/$/.test(request.path)) {
       request.path = path.join(request.path, settings.resolve_index);
     }
-    info = (ref$ = import$(import$({}, settings), request), ref$.settings = settings, ref$.request = request, ref$.cwd = process.cwd(), ref$.matches = 0, ref$);
+    info = (ref1$ = import$(import$({}, settings), request), ref1$.settings = settings, ref1$.request = request, ref1$.cwd = process.cwd(), ref1$.matches = 0, ref1$);
     success = false;
     log_prefix = ">>>>    [compiler]";
     if (settings.log_level <= LOG.DEBUG) {
@@ -353,10 +353,10 @@ exports.Compiler = Compiler = (function(superclass){
     });
   };
   prototype.stale = function(srcStat, destStat, cb){
-    var delta, ref$;
+    var delta, ref$, ref1$;
     delta = ((ref$ = this.info.delta) != null
       ? ref$
-      : (ref$ = this.delta) != null ? ref$ : 0) * 1000;
+      : (ref1$ = this.delta) != null ? ref1$ : 0) * 1000;
     this.log(LOG.DEBUG, "stale( " + typeof srcStat + ", " + typeof destStat + ", " + typeof cb + " )");
     if (!srcStat) {
       return cb(new Error("Source does not exist?!"));
@@ -382,7 +382,7 @@ exports.Compiler = Compiler = (function(superclass){
   prototype.compile = null;
   prototype.compileSync = null;
   prototype.doCompile = function(text, wrapped, cb){
-    var ref$, WrappedCompiler, wc, info_opts, opts, args, fn, err, this$ = this;
+    var ref$, WrappedCompiler, wc, info_opts, ref1$, opts, args, fn, err, this$ = this;
     if (!cb) {
       ref$ = [wrapped, false], cb = ref$[0], wrapped = ref$[1];
     }
@@ -397,7 +397,7 @@ exports.Compiler = Compiler = (function(superclass){
         }
       });
     }
-    info_opts = ((ref$ = this.info.options) != null ? ref$[this.id] : void 8) || {};
+    info_opts = ((ref1$ = this.info.options) != null ? ref1$[this.id] : void 8) || {};
     if (typeof this.options === 'function') {
       opts = this.options(info_opts);
     } else if (this.options || info_opts) {
@@ -538,19 +538,19 @@ exports.ExternalCompiler = ExternalCompiler = (function(superclass){
     superclass.apply(this, arguments);
   }
   prototype.compile = function(text, options, cb){
-    var info_options, ref$, cmd, child, this$ = this;
+    var info_options, ref$, ref1$, ref2$, ref3$, cmd, child, this$ = this;
     if (!cb) {
       cb = options;
       options = {};
     }
     info_options = ((ref$ = this.info.options) != null ? ref$[this.id] : void 8) || {};
     options = import$(import$({}, info_options), options) || {};
-    options.timeout = ((ref$ = options.external_timeout) != null
-      ? ref$
-      : (ref$ = options.timeout) != null
-        ? ref$
-        : (ref$ = this.info.external_timeout) != null
-          ? ref$
+    options.timeout = ((ref1$ = options.external_timeout) != null
+      ? ref1$
+      : (ref2$ = options.timeout) != null
+        ? ref2$
+        : (ref3$ = this.info.external_timeout) != null
+          ? ref3$
           : this.timeout) * 1000;
     options.cwd || (options.cwd = this.cwd);
     options.env || (options.env = this.env);
@@ -950,7 +950,7 @@ helpers.mkdirp = mkdirp = (function(){
     }
     cb || (cb = function(){});
     p = expand(p);
-    return path.exists(p, function(exists){
+    return fs.exists(p, function(exists){
       var ps, _p;
       if (exists) {
         return cb(null);
